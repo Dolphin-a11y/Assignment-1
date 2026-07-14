@@ -17,5 +17,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  return (
+    <html lang="en">
+      <head>
+        <script
+          src="https://cdnjs.cloudflare.com/ajax/libs/tone/15.5.27/Tone.js"
+          crossOrigin="anonymous"
+          defer
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
 }

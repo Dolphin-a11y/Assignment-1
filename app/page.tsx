@@ -4,6 +4,32 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type CheckIn = { id: number; level: number; label: string; time: string };
 
+type AudioNodeLike = { connect: (destination: unknown) => AudioNodeLike; dispose: () => void };
+type GainNodeLike = AudioNodeLike & { toDestination: () => GainNodeLike };
+type SynthLike = AudioNodeLike & { triggerAttackRelease: (note: string, duration: string, time: number, velocity: number) => void };
+type LoopLike = { start: (time: number) => LoopLike; dispose: () => void };
+type ToneRuntime = {
+  start: () => Promise<void>;
+  Gain: new (gain: number) => GainNodeLike;
+  Reverb: new (options: { decay: number; wet: number }) => AudioNodeLike;
+  PolySynth: new (synth: unknown, options: object) => SynthLike;
+  Synth: unknown;
+  Loop: new (callback: (time: number) => void, interval: string) => LoopLike;
+  getTransport: () => { bpm: { value: number }; start: () => void };
+};
+
+declare global {
+  interface Window { Tone?: ToneRuntime }
+}
+
+async function waitForTone() {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    if (window.Tone) return window.Tone;
+    await new Promise((resolve) => window.setTimeout(resolve, 100));
+  }
+  return null;
+}
+
 const puzzleImages = [
   { name: "Misty lake", url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd4297?auto=format&fit=crop&w=900&q=85" },
   { name: "Forest light", url: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=900&q=85" },
@@ -124,7 +150,8 @@ export default function Home() {
     if (!soundOn) return;
     let cancelled = false;
     async function beginSound() {
-      const Tone = await import("tone");
+      const Tone = await waitForTone();
+      if (!Tone) { setSoundOn(false); return; }
       await Tone.start();
       if (cancelled) return;
       soundRef.current?.dispose();
