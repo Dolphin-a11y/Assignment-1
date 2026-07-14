@@ -104,6 +104,16 @@ function FindGame() {
     { name: "striped ball", icon: "⚽", position: "object-ball" },
     { name: "small candle", icon: "🕯️", position: "object-candle" },
     { name: "sea shell", icon: "🐚", position: "object-shell" },
+    { name: "magnifying glass", icon: "🔍", position: "object-magnifier" },
+    { name: "headphones", icon: "🎧", position: "object-headphones" },
+    { name: "camera", icon: "📷", position: "object-camera" },
+    { name: "scissors", icon: "✂️", position: "object-scissors" },
+    { name: "blue gem", icon: "💎", position: "object-gem" },
+    { name: "winter glove", icon: "🧤", position: "object-glove" },
+    { name: "pink flower", icon: "🌸", position: "object-flower" },
+    { name: "umbrella", icon: "☂️", position: "object-umbrella" },
+    { name: "yellow pencil", icon: "✏️", position: "object-pencil" },
+    { name: "little bottle", icon: "🧴", position: "object-bottle" },
   ];
   const hiddenAt = useMemo(() => round % objects.length, [round]);
   const target = objects[hiddenAt];
@@ -116,6 +126,9 @@ function FindGame() {
         <div className="room-side room-side-left" />
         <div className="room-side room-side-right" />
         <div className="room-floor-lines"><i /><i /><i /><i /><i /></div>
+        <div className="room-stairs"><i /><i /><i /><i /><i /><i /></div>
+        <div className="room-bookcase"><i /><i /><i /><i /><span /><span /><span /></div>
+        <div className="room-coat-rack"><i /><i /><i /></div>
         <div className="room-curtain curtain-left" /><div className="room-curtain curtain-right" />
         <div className="room-window"><span /><span /></div>
         <div className="room-frame">☁</div>
@@ -123,6 +136,10 @@ function FindGame() {
         <div className="room-shelf"><i /><i /><i /></div>
         <div className="room-clock"><i /></div>
         <div className="room-cabinet"><i /><i /><span /><span /></div>
+        <div className="room-desk"><div className="room-monitor">◒</div><i /><i /></div>
+        <div className="room-boxes"><i /><i /><i /></div>
+        <div className="room-papers">▱ ▰ ▱</div>
+        <div className="room-suitcase">▥</div>
         <div className="room-lamp"><i /></div>
         <div className="room-sofa"><span /><span /></div>
         <div className="room-table" />
@@ -226,13 +243,15 @@ export default function Home() {
       await Tone.start();
       if (cancelled) return;
       soundRef.current?.dispose();
-      const gain = new Tone.Gain(0.075).toDestination();
+      const gain = new Tone.Gain(0.16).toDestination();
       const reverb = new Tone.Reverb({ decay: info.key === "high" ? 8 : 4, wet: 0.7 }).connect(gain);
-      const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: 2.8, release: 5 } }).connect(reverb);
-      const notes = info.key === "low" ? ["C4", "E4", "G4", "E4"] : info.key === "moderate" ? ["A3", "C4", "E4", "C4"] : ["F3", "A3", "C4", "G3"];
+      const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: info.key === "low" ? "triangle" : info.key === "moderate" ? "sine" : "sine" }, envelope: { attack: info.key === "low" ? 0.8 : info.key === "moderate" ? 2.2 : 3.8, release: info.key === "high" ? 7 : 4 } }).connect(reverb);
+      const notes = info.key === "low" ? ["C4", "E4", "G4", "C5", "G4", "E4"] : info.key === "moderate" ? ["A3", "C4", "E4", "G4", "E4", "C4"] : ["F3", "C4", "A3", "G3"];
       let step = 0;
-      const loop = new Tone.Loop((time) => { synth.triggerAttackRelease(notes[step++ % notes.length], "2n", time, 0.35); }, info.key === "high" ? "1m" : "2n").start(0);
-      Tone.getTransport().bpm.value = info.key === "low" ? 72 : info.key === "moderate" ? 60 : 48;
+      const duration = info.key === "low" ? "4n" : info.key === "moderate" ? "2n" : "1m";
+      const interval = info.key === "low" ? "4n" : info.key === "moderate" ? "2n" : "1m";
+      const loop = new Tone.Loop((time) => { synth.triggerAttackRelease(notes[step++ % notes.length], duration, time, info.key === "high" ? 0.42 : 0.52); }, interval).start(0);
+      Tone.getTransport().bpm.value = info.key === "low" ? 78 : info.key === "moderate" ? 60 : 44;
       Tone.getTransport().start();
       soundRef.current = { dispose: () => { loop.dispose(); synth.dispose(); reverb.dispose(); gain.dispose(); } };
     }

@@ -77,11 +77,21 @@
       { name: "striped ball", icon: "⚽", position: "object-ball" },
       { name: "small candle", icon: "🕯️", position: "object-candle" },
       { name: "sea shell", icon: "🐚", position: "object-shell" },
+      { name: "magnifying glass", icon: "🔍", position: "object-magnifier" },
+      { name: "headphones", icon: "🎧", position: "object-headphones" },
+      { name: "camera", icon: "📷", position: "object-camera" },
+      { name: "scissors", icon: "✂️", position: "object-scissors" },
+      { name: "blue gem", icon: "💎", position: "object-gem" },
+      { name: "winter glove", icon: "🧤", position: "object-glove" },
+      { name: "pink flower", icon: "🌸", position: "object-flower" },
+      { name: "umbrella", icon: "☂️", position: "object-umbrella" },
+      { name: "yellow pencil", icon: "✏️", position: "object-pencil" },
+      { name: "little bottle", icon: "🧴", position: "object-bottle" },
     ];
     const hiddenAt = (round - 1) % objects.length;
     const target = objects[hiddenAt];
     const objectButtons = objects.map((item, index) => `<button type="button" aria-label="${item.name}" class="room-object ${item.position}" data-target="${index === hiddenAt}">${item.icon}</button>`).join("");
-    gameShell().outerHTML = `<div class="game-shell find-game"><div class="game-top"><span>Find the ${target.name} hidden in the room</span><strong>Round ${round}</strong></div><div class="room-scene"><div class="room-ceiling"></div><div class="room-side room-side-left"></div><div class="room-side room-side-right"></div><div class="room-floor-lines"><i></i><i></i><i></i><i></i><i></i></div><div class="room-curtain curtain-left"></div><div class="room-curtain curtain-right"></div><div class="room-window"><span></span><span></span></div><div class="room-frame">☁</div><div class="room-pictures"><i>✦</i><i>❧</i></div><div class="room-shelf"><i></i><i></i><i></i></div><div class="room-clock"><i></i></div><div class="room-cabinet"><i></i><i></i><span></span><span></span></div><div class="room-lamp"><i></i></div><div class="room-sofa"><span></span><span></span></div><div class="room-table"></div><div class="room-ottoman"></div><div class="room-basket">⌁</div><div class="room-rug"></div><div class="room-plant">♧</div>${objectButtons}</div></div>`;
+    gameShell().outerHTML = `<div class="game-shell find-game"><div class="game-top"><span>Find the ${target.name} hidden in the room</span><strong>Round ${round}</strong></div><div class="room-scene"><div class="room-ceiling"></div><div class="room-side room-side-left"></div><div class="room-side room-side-right"></div><div class="room-floor-lines"><i></i><i></i><i></i><i></i><i></i></div><div class="room-stairs"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="room-bookcase"><i></i><i></i><i></i><i></i><span></span><span></span><span></span></div><div class="room-coat-rack"><i></i><i></i><i></i></div><div class="room-curtain curtain-left"></div><div class="room-curtain curtain-right"></div><div class="room-window"><span></span><span></span></div><div class="room-frame">☁</div><div class="room-pictures"><i>✦</i><i>❧</i></div><div class="room-shelf"><i></i><i></i><i></i></div><div class="room-clock"><i></i></div><div class="room-cabinet"><i></i><i></i><span></span><span></span></div><div class="room-desk"><div class="room-monitor">◒</div><i></i><i></i></div><div class="room-boxes"><i></i><i></i><i></i></div><div class="room-papers">▱ ▰ ▱</div><div class="room-suitcase">▥</div><div class="room-lamp"><i></i></div><div class="room-sofa"><span></span><span></span></div><div class="room-table"></div><div class="room-ottoman"></div><div class="room-basket">⌁</div><div class="room-rug"></div><div class="room-plant">♧</div>${objectButtons}</div></div>`;
     const room = gameSection.querySelector(".room-scene");
     room.querySelector('[data-target="true"]').addEventListener("click", (event) => {
       event.currentTarget.classList.add("found");
@@ -224,13 +234,15 @@
     if (!Tone || !soundOn) return;
     await Tone.start();
     const info = stressInfo(stress);
-    const gain = new Tone.Gain(0.075).toDestination();
+    const gain = new Tone.Gain(0.16).toDestination();
     const reverb = new Tone.Reverb({ decay: info.key === "high" ? 8 : 4, wet: 0.7 }).connect(gain);
-    const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: 2.8, release: 5 } }).connect(reverb);
-    const notes = info.key === "low" ? ["C4", "E4", "G4", "E4"] : info.key === "moderate" ? ["A3", "C4", "E4", "C4"] : ["F3", "A3", "C4", "G3"];
+    const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: info.key === "low" ? "triangle" : "sine" }, envelope: { attack: info.key === "low" ? 0.8 : info.key === "moderate" ? 2.2 : 3.8, release: info.key === "high" ? 7 : 4 } }).connect(reverb);
+    const notes = info.key === "low" ? ["C4", "E4", "G4", "C5", "G4", "E4"] : info.key === "moderate" ? ["A3", "C4", "E4", "G4", "E4", "C4"] : ["F3", "C4", "A3", "G3"];
     let step = 0;
-    const loop = new Tone.Loop((time) => synth.triggerAttackRelease(notes[step++ % notes.length], "2n", time, 0.35), info.key === "high" ? "1m" : "2n").start(0);
-    Tone.getTransport().bpm.value = info.key === "low" ? 72 : info.key === "moderate" ? 60 : 48;
+    const duration = info.key === "low" ? "4n" : info.key === "moderate" ? "2n" : "1m";
+    const interval = info.key === "low" ? "4n" : info.key === "moderate" ? "2n" : "1m";
+    const loop = new Tone.Loop((time) => synth.triggerAttackRelease(notes[step++ % notes.length], duration, time, info.key === "high" ? 0.42 : 0.52), interval).start(0);
+    Tone.getTransport().bpm.value = info.key === "low" ? 78 : info.key === "moderate" ? 60 : 44;
     Tone.getTransport().start();
     soundSession = { dispose: () => { loop.dispose(); synth.dispose(); reverb.dispose(); gain.dispose(); } };
   }
