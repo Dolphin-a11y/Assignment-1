@@ -135,6 +135,18 @@
   }
 
   async function waitForTone() {
+    for (let attempt = 0; attempt < 12; attempt++) {
+      if (window.Tone) return window.Tone;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    if (!document.querySelector('script[data-tone-fallback]')) {
+      const fallback = document.createElement("script");
+      fallback.src = "./vendor/Tone.js";
+      fallback.dataset.toneFallback = "true";
+      document.head.appendChild(fallback);
+    }
+
     for (let attempt = 0; attempt < 50; attempt++) {
       if (window.Tone) return window.Tone;
       await new Promise((resolve) => setTimeout(resolve, 100));
