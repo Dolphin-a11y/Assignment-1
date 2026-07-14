@@ -8,7 +8,8 @@ html = html.replace(/<script(?![^>]*cdnjs\.cloudflare\.com)[^>]*>[\s\S]*?<\/scri
 html = html.replace(/<\/html>[\s\S]*$/g, "</html>");
 html = html.replace("</head>", '<script src="/vendor/Tone.js?v=15.5.27" defer></script></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/room.css?v=1"></head>');
-html = html.replace("</body>", '<script src="/standalone.js?v=hidden-room-v2" defer></script></body>');
+html = html.replace("</head>", '<link rel="stylesheet" href="/room-3d.css?v=1"></head>');
+html = html.replace("</body>", '<script src="/standalone.js?v=hidden-room-v3" defer></script></body>');
 
 await writeFile(path, html, "utf8");
 console.log("Prepared standalone static page");

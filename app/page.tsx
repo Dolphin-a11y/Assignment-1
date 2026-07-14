@@ -100,20 +100,34 @@ function FindGame() {
     { name: "red apple", icon: "🍎", position: "object-apple" },
     { name: "little book", icon: "📕", position: "object-book" },
     { name: "tea cup", icon: "☕", position: "object-cup" },
+    { name: "round glasses", icon: "👓", position: "object-glasses" },
+    { name: "striped ball", icon: "⚽", position: "object-ball" },
+    { name: "small candle", icon: "🕯️", position: "object-candle" },
+    { name: "sea shell", icon: "🐚", position: "object-shell" },
   ];
-  const hiddenAt = useMemo(() => round % 3, [round]);
+  const hiddenAt = useMemo(() => round % objects.length, [round]);
   const target = objects[hiddenAt];
   function next() { setFound(false); setRound((r) => r + 1); }
   return (
     <div className="game-shell find-game">
       <div className="game-top"><span>Find the {target.name} hidden in the room</span><strong>Round {round + 1}</strong></div>
       <div className="room-scene">
+        <div className="room-ceiling" />
+        <div className="room-side room-side-left" />
+        <div className="room-side room-side-right" />
+        <div className="room-floor-lines"><i /><i /><i /><i /><i /></div>
+        <div className="room-curtain curtain-left" /><div className="room-curtain curtain-right" />
         <div className="room-window"><span /><span /></div>
         <div className="room-frame">☁</div>
+        <div className="room-pictures"><i>✦</i><i>❧</i></div>
         <div className="room-shelf"><i /><i /><i /></div>
+        <div className="room-clock"><i /></div>
+        <div className="room-cabinet"><i /><i /><span /><span /></div>
         <div className="room-lamp"><i /></div>
         <div className="room-sofa"><span /><span /></div>
         <div className="room-table" />
+        <div className="room-ottoman" />
+        <div className="room-basket">⌁</div>
         <div className="room-rug" />
         <div className="room-plant">♧</div>
         {objects.map((item, i) => <button key={item.name} type="button" onClick={() => i === hiddenAt && setFound(true)} aria-label={item.name} className={`room-object ${item.position}${found && i === hiddenAt ? " found" : ""}`}>{item.icon}</button>)}

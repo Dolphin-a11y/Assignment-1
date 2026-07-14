@@ -73,11 +73,15 @@
       { name: "red apple", icon: "🍎", position: "object-apple" },
       { name: "little book", icon: "📕", position: "object-book" },
       { name: "tea cup", icon: "☕", position: "object-cup" },
+      { name: "round glasses", icon: "👓", position: "object-glasses" },
+      { name: "striped ball", icon: "⚽", position: "object-ball" },
+      { name: "small candle", icon: "🕯️", position: "object-candle" },
+      { name: "sea shell", icon: "🐚", position: "object-shell" },
     ];
-    const hiddenAt = (round - 1) % 3;
+    const hiddenAt = (round - 1) % objects.length;
     const target = objects[hiddenAt];
     const objectButtons = objects.map((item, index) => `<button type="button" aria-label="${item.name}" class="room-object ${item.position}" data-target="${index === hiddenAt}">${item.icon}</button>`).join("");
-    gameShell().outerHTML = `<div class="game-shell find-game"><div class="game-top"><span>Find the ${target.name} hidden in the room</span><strong>Round ${round}</strong></div><div class="room-scene"><div class="room-window"><span></span><span></span></div><div class="room-frame">☁</div><div class="room-shelf"><i></i><i></i><i></i></div><div class="room-lamp"><i></i></div><div class="room-sofa"><span></span><span></span></div><div class="room-table"></div><div class="room-rug"></div><div class="room-plant">♧</div>${objectButtons}</div></div>`;
+    gameShell().outerHTML = `<div class="game-shell find-game"><div class="game-top"><span>Find the ${target.name} hidden in the room</span><strong>Round ${round}</strong></div><div class="room-scene"><div class="room-ceiling"></div><div class="room-side room-side-left"></div><div class="room-side room-side-right"></div><div class="room-floor-lines"><i></i><i></i><i></i><i></i><i></i></div><div class="room-curtain curtain-left"></div><div class="room-curtain curtain-right"></div><div class="room-window"><span></span><span></span></div><div class="room-frame">☁</div><div class="room-pictures"><i>✦</i><i>❧</i></div><div class="room-shelf"><i></i><i></i><i></i></div><div class="room-clock"><i></i></div><div class="room-cabinet"><i></i><i></i><span></span><span></span></div><div class="room-lamp"><i></i></div><div class="room-sofa"><span></span><span></span></div><div class="room-table"></div><div class="room-ottoman"></div><div class="room-basket">⌁</div><div class="room-rug"></div><div class="room-plant">♧</div>${objectButtons}</div></div>`;
     const room = gameSection.querySelector(".room-scene");
     room.querySelector('[data-target="true"]').addEventListener("click", (event) => {
       event.currentTarget.classList.add("found");
