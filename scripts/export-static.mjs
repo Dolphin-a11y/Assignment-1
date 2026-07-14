@@ -14,6 +14,6 @@ let html = await response.text();
 html = html.replace(/<link rel="modulepreload"[^>]*>/g, "");
 html = html.replace(/<script(?![^>]*cdnjs\.cloudflare\.com)[^>]*>[\s\S]*?<\/script>/g, "");
 html = html.replace(/<\/html>[\s\S]*$/g, "</html>");
-html = html.replace("</body>", '<script src="/standalone.js" defer></script></body>');
+html = html.replace("</body>", '<script src="/standalone.js?v=tone-fallback" defer></script></body>');
 await writeFile(new URL("../public/index.html", import.meta.url), html, "utf8");
 console.log("Exported public/index.html");
