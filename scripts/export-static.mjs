@@ -10,5 +10,10 @@ const response = await worker.fetch(
 );
 
 if (!response.ok) throw new Error(`Static export failed with ${response.status}`);
-await writeFile(new URL("../public/index.html", import.meta.url), await response.text(), "utf8");
+let html = await response.text();
+html = html.replace(/<link rel="modulepreload"[^>]*>/g, "");
+html = html.replace(/<script(?![^>]*cdnjs\.cloudflare\.com)[^>]*>[\s\S]*?<\/script>/g, "");
+html = html.replace(/<\/html>[\s\S]*$/g, "</html>");
+html = html.replace("</body>", '<script src="/standalone.js" defer></script></body>');
+await writeFile(new URL("../public/index.html", import.meta.url), html, "utf8");
 console.log("Exported public/index.html");
