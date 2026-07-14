@@ -25,7 +25,7 @@
   function stressInfo(level) {
     if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", game: "Focus Sprint", copy: "A playful burst to channel your energy into one simple target." };
     if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", game: "Hidden Object Room", copy: "Let busy thoughts soften while you search a cosy room for one tiny object." };
-    return { key: "high", label: "Feeling overloaded", note: "No rush. Settle into something slow and tactile.", game: "Quiet Jigsaw", copy: "Piece by piece. There is nothing to hurry and nowhere else to be." };
+    return { key: "high", label: "Feeling overloaded", note: "No rush. Let your breathing become slow and steady.", game: "Guided Breathing", copy: "A longer exhale can help your body ease out of its alert state. Go gently." };
   }
 
   function shuffle(size = 9) {
@@ -116,6 +116,52 @@
     draw();
   }
 
+  function renderBreathing() {
+    const phases = [
+      { key: "inhale", label: "Breathe in", duration: 4 },
+      { key: "hold", label: "Hold gently", duration: 2 },
+      { key: "exhale", label: "Breathe out", duration: 6 },
+    ];
+    let phaseIndex = 0;
+    let seconds = phases[0].duration;
+    let cycles = 0;
+    let running = false;
+    let timer = null;
+    gameShell().outerHTML = `<div class="game-shell breathing-game"><div class="game-top"><span>Follow the circle at your own pace</span><strong class="breath-cycles">0 cycles</strong></div><div class="breathing-field phase-inhale"><div class="breath-rings"><i></i><i></i><div class="breath-orb"><span aria-live="polite">Breathe in</span><strong>4</strong></div></div><div class="breath-guide"><span><b>4</b> inhale</span><span><b>2</b> hold</span><span><b>6</b> exhale</span></div><div class="breath-controls"><button type="button" class="breath-toggle">Begin breathing</button><button type="button" class="breath-reset">Reset</button></div></div></div>`;
+    const field = gameSection.querySelector(".breathing-field");
+    const label = field.querySelector(".breath-orb span");
+    const countdown = field.querySelector(".breath-orb strong");
+    const cycleLabel = gameSection.querySelector(".breath-cycles");
+    const toggle = field.querySelector(".breath-toggle");
+
+    function drawBreath() {
+      const phase = phases[phaseIndex];
+      field.className = `breathing-field phase-${phase.key}${running ? " running" : ""}`;
+      label.textContent = phase.label;
+      countdown.textContent = seconds;
+      cycleLabel.textContent = `${cycles} ${cycles === 1 ? "cycle" : "cycles"}`;
+      toggle.textContent = running ? "Pause" : cycles ? "Continue" : "Begin breathing";
+    }
+
+    function stopTimer() { if (timer) window.clearInterval(timer); timer = null; }
+    function startTimer() {
+      stopTimer();
+      timer = window.setInterval(() => {
+        if (!field.isConnected) { stopTimer(); return; }
+        if (seconds > 1) seconds -= 1;
+        else {
+          phaseIndex = (phaseIndex + 1) % phases.length;
+          if (phaseIndex === 0) cycles += 1;
+          seconds = phases[phaseIndex].duration;
+        }
+        drawBreath();
+      }, 1000);
+    }
+
+    toggle.addEventListener("click", () => { running = !running; if (running) startTimer(); else stopTimer(); drawBreath(); });
+    field.querySelector(".breath-reset").addEventListener("click", () => { stopTimer(); running = false; phaseIndex = 0; seconds = phases[0].duration; cycles = 0; drawBreath(); });
+  }
+
   function renderExperience(force = false) {
     const info = stressInfo(stress);
     app.className = `app theme-${info.key}`;
@@ -129,7 +175,7 @@
     currentMode = info.key;
     if (info.key === "low") renderFocus();
     else if (info.key === "moderate") renderFind();
-    else renderPuzzle();
+    else renderBreathing();
     if (soundOn) restartSound();
   }
 

@@ -45,7 +45,7 @@ const videos = [
 function stressInfo(level: number) {
   if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", color: "#2f7d63", game: "Focus Sprint" };
   if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#b86b37", game: "Hidden Object Room" };
-  return { key: "high", label: "Feeling overloaded", note: "No rush. Settle into something slow and tactile.", color: "#6a5d9d", game: "Quiet Jigsaw" };
+  return { key: "high", label: "Feeling overloaded", note: "No rush. Let your breathing become slow and steady.", color: "#6a5d9d", game: "Guided Breathing" };
 }
 
 function shuffle(size = 9) {
@@ -132,6 +132,46 @@ function FindGame() {
         <div className="room-plant">♧</div>
         {objects.map((item, i) => <button key={item.name} type="button" onClick={() => i === hiddenAt && setFound(true)} aria-label={item.name} className={`room-object ${item.position}${found && i === hiddenAt ? " found" : ""}`}>{item.icon}</button>)}
         {found && <div className="found-message"><strong>You found it!</strong><span>One small detail brought you into the moment.</span><button onClick={next}>Explore a new room</button></div>}
+      </div>
+    </div>
+  );
+}
+
+function BreathingGame() {
+  const phases = [
+    { key: "inhale", label: "Breathe in", duration: 4 },
+    { key: "hold", label: "Hold gently", duration: 2 },
+    { key: "exhale", label: "Breathe out", duration: 6 },
+  ];
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [seconds, setSeconds] = useState(phases[0].duration);
+  const [running, setRunning] = useState(false);
+  const [cycles, setCycles] = useState(0);
+  const phase = phases[phaseIndex];
+
+  useEffect(() => {
+    if (!running) return;
+    const timer = window.setTimeout(() => {
+      if (seconds > 1) { setSeconds((value) => value - 1); return; }
+      const next = (phaseIndex + 1) % phases.length;
+      if (next === 0) setCycles((value) => value + 1);
+      setPhaseIndex(next);
+      setSeconds(phases[next].duration);
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [running, seconds, phaseIndex]);
+
+  function reset() {
+    setRunning(false); setPhaseIndex(0); setSeconds(phases[0].duration); setCycles(0);
+  }
+
+  return (
+    <div className="game-shell breathing-game">
+      <div className="game-top"><span>Follow the circle at your own pace</span><strong>{cycles} {cycles === 1 ? "cycle" : "cycles"}</strong></div>
+      <div className={`breathing-field phase-${phase.key}`}>
+        <div className="breath-rings"><i /><i /><div className="breath-orb"><span aria-live="polite">{phase.label}</span><strong>{seconds}</strong></div></div>
+        <div className="breath-guide"><span><b>4</b> inhale</span><span><b>2</b> hold</span><span><b>6</b> exhale</span></div>
+        <div className="breath-controls"><button type="button" onClick={() => setRunning((value) => !value)}>{running ? "Pause" : cycles ? "Continue" : "Begin breathing"}</button><button type="button" className="breath-reset" onClick={reset}>Reset</button></div>
       </div>
     </div>
   );
@@ -231,8 +271,8 @@ export default function Home() {
       </section>
 
       <section className="game-section">
-        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "Piece by piece. There is nothing to hurry and nowhere else to be."}</p></div>
-        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <PuzzleGame />}
+        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "A longer exhale can help your body ease out of its alert state. Go gently."}</p></div>
+        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <BreathingGame />}
       </section>
 
       <section id="progress" className="progress-section">
