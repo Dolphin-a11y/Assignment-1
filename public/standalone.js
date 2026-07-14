@@ -24,7 +24,7 @@
 
   function stressInfo(level) {
     if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", game: "Focus Sprint", copy: "A playful burst to channel your energy into one simple target." };
-    if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", game: "Hidden Meadow", copy: "Let the busy thoughts soften while your eyes search the meadow." };
+    if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", game: "Hidden Object Room", copy: "Let busy thoughts soften while you search a cosy room for one tiny object." };
     return { key: "high", label: "Feeling overloaded", note: "No rush. Settle into something slow and tactile.", game: "Quiet Jigsaw", copy: "Piece by piece. There is nothing to hurry and nowhere else to be." };
   }
 
@@ -66,14 +66,23 @@
   }
 
   function renderFind(round = 1) {
-    const hiddenAt = Math.floor(Math.random() * 35);
-    const blooms = Array.from({ length: 35 }, (_, index) => `<button type="button" aria-label="${index === hiddenAt ? "Hidden leaf" : "Flower"}">${index === hiddenAt ? "☘" : ["✿", "❀", "✽"][index % 3]}</button>`).join("");
-    gameShell().outerHTML = `<div class="game-shell find-game"><div class="game-top"><span>Find the tiny leaf among the blooms</span><strong>Round ${round}</strong></div><div class="meadow-grid">${blooms}</div></div>`;
-    const meadow = gameSection.querySelector(".meadow-grid");
-    meadow.querySelector('[aria-label="Hidden leaf"]').addEventListener("click", (event) => {
+    const objects = [
+      { name: "golden key", icon: "🔑", position: "object-key" },
+      { name: "tiny star", icon: "⭐", position: "object-star" },
+      { name: "blue feather", icon: "🪶", position: "object-feather" },
+      { name: "red apple", icon: "🍎", position: "object-apple" },
+      { name: "little book", icon: "📕", position: "object-book" },
+      { name: "tea cup", icon: "☕", position: "object-cup" },
+    ];
+    const hiddenAt = (round - 1) % 3;
+    const target = objects[hiddenAt];
+    const objectButtons = objects.map((item, index) => `<button type="button" aria-label="${item.name}" class="room-object ${item.position}" data-target="${index === hiddenAt}">${item.icon}</button>`).join("");
+    gameShell().outerHTML = `<div class="game-shell find-game"><div class="game-top"><span>Find the ${target.name} hidden in the room</span><strong>Round ${round}</strong></div><div class="room-scene"><div class="room-window"><span></span><span></span></div><div class="room-frame">☁</div><div class="room-shelf"><i></i><i></i><i></i></div><div class="room-lamp"><i></i></div><div class="room-sofa"><span></span><span></span></div><div class="room-table"></div><div class="room-rug"></div><div class="room-plant">♧</div>${objectButtons}</div></div>`;
+    const room = gameSection.querySelector(".room-scene");
+    room.querySelector('[data-target="true"]').addEventListener("click", (event) => {
       event.currentTarget.classList.add("found");
-      meadow.insertAdjacentHTML("beforeend", `<div class="found-message"><strong>You found it!</strong><span>Notice that tiny moment of focus.</span><button type="button">New meadow</button></div>`);
-      meadow.querySelector(".found-message button").addEventListener("click", () => renderFind(round + 1));
+      room.insertAdjacentHTML("beforeend", `<div class="found-message"><strong>You found it!</strong><span>One small detail brought you into the moment.</span><button type="button">Explore a new room</button></div>`);
+      room.querySelector(".found-message button").addEventListener("click", () => renderFind(round + 1));
     });
   }
 

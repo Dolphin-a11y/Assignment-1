@@ -58,12 +58,25 @@ h2 { font-size: clamp(36px, 5vw, 55px); margin-top: 7px; }
 .focus-orb { position: absolute; width: 58px; height: 58px; transform: translate(-50%, -50%); border-radius: 50%; border: 0; background: radial-gradient(circle at 35% 28%, white, var(--accent) 60%); box-shadow: 0 0 0 13px color-mix(in srgb, var(--accent) 13%, transparent), 0 10px 30px rgba(0,0,0,.15); cursor: pointer; z-index: 2; transition: left .25s, top .25s; }
 .game-message { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 18px; z-index: 2; }
 .game-message span { font-family: Georgia, serif; font-size: 28px; }
-.meadow-grid { min-height: 430px; padding: 55px; display: grid; grid-template-columns: repeat(7, 1fr); align-items: center; position: relative; background: linear-gradient(180deg, #e9f0df, #d8e8cf); }
-.meadow-grid > button { border: 0; background: transparent; color: #d99b74; font-size: 32px; cursor: pointer; transition: transform .2s; }
-.meadow-grid > button:nth-child(3n) { color: #d6b85b; transform: scale(.82); }
-.meadow-grid > button:nth-child(4n) { color: #cfa9be; transform: scale(1.12); }
-.meadow-grid > button:hover { transform: scale(1.35); }
-.meadow-grid > button.found { color: #4d8654; animation: pulse .8s infinite alternate; }
+.room-scene { min-height: 430px; position: relative; overflow: hidden; background: linear-gradient(180deg, #e7d6bf 0 72%, #b98f6e 72%); }
+.room-scene::before { content: ""; position: absolute; inset: 72% 0 auto; height: 8px; background: #8b634d; box-shadow: 0 22px 50px rgba(78,49,36,.22); }
+.room-window { position: absolute; left: 8%; top: 12%; width: 22%; height: 36%; display: grid; grid-template-columns: 1fr 1fr; border: 9px solid #8d654d; border-radius: 5px; background: linear-gradient(#9bc8d4, #e9d5b1); box-shadow: inset 0 0 0 2px rgba(255,255,255,.45); }
+.room-window span:first-child { border-right: 4px solid #8d654d; }
+.room-frame { position: absolute; right: 11%; top: 12%; width: 13%; height: 22%; display: grid; place-items: center; color: #eee4d3; font-size: 32px; border: 7px solid #77533f; background: #79928a; }
+.room-shelf { position: absolute; left: 35%; top: 17%; width: 28%; height: 9px; border-radius: 4px; background: #815942; box-shadow: 0 5px 0 #684432; }
+.room-shelf i { position: absolute; bottom: 8px; width: 22px; border-radius: 3px 3px 0 0; background: #ad6954; }
+.room-shelf i:nth-child(1) { left: 15%; height: 47px; } .room-shelf i:nth-child(2) { left: 36%; height: 35px; background: #587c75; } .room-shelf i:nth-child(3) { right: 18%; height: 55px; background: #d09a57; }
+.room-sofa { position: absolute; left: 28%; bottom: 16%; width: 45%; height: 34%; border-radius: 40px 40px 17px 17px; background: #718e87; border: 8px solid #58736d; box-shadow: inset 0 -28px 0 #66827b, 0 14px 0 -7px #513e35; }
+.room-sofa::before, .room-sofa::after { content: ""; position: absolute; bottom: -22px; width: 13px; height: 24px; background: #513e35; } .room-sofa::before { left: 13%; } .room-sofa::after { right: 13%; }
+.room-sofa span { position: absolute; top: 17%; width: 35%; height: 43%; border-radius: 18px; background: #d8b074; transform: rotate(-4deg); } .room-sofa span:first-child { left: 10%; } .room-sofa span:last-child { right: 10%; background: #bd7661; transform: rotate(5deg); }
+.room-table { position: absolute; z-index: 1; right: 9%; bottom: 12%; width: 21%; height: 9%; border-radius: 50%; background: #825b43; box-shadow: 0 10px 0 #684633, 0 46px 0 -35px #583d2f; }
+.room-lamp { position: absolute; left: 13%; bottom: 13%; width: 9px; height: 35%; background: #765a45; } .room-lamp::before { content: ""; position: absolute; left: -38px; top: -20px; border-left: 43px solid transparent; border-right: 43px solid transparent; border-bottom: 69px solid #d9a75e; transform: rotate(180deg); } .room-lamp i { position: absolute; left: -28px; bottom: -5px; width: 65px; height: 13px; border-radius: 50%; background: #765a45; }
+.room-rug { position: absolute; left: 24%; bottom: -8%; width: 55%; height: 27%; border-radius: 50%; background: repeating-radial-gradient(ellipse, #d2a56b 0 12px, #ad7158 13px 24px); opacity: .78; }
+.room-plant { position: absolute; right: 4%; top: 38%; color: #4d7864; font: 70px Georgia, serif; transform: rotate(16deg); }
+.room-object { position: absolute; z-index: 2; border: 0; padding: 5px; cursor: pointer; background: transparent; font-size: 21px; filter: saturate(.75); transition: transform .2s, filter .2s; }
+.room-object:hover, .room-object:focus-visible { transform: scale(1.35); filter: saturate(1.2); }
+.room-object.found { animation: pulse .8s infinite alternate; filter: drop-shadow(0 0 7px white) saturate(1.3); }
+.object-key { left: 47%; bottom: 18%; transform: rotate(20deg) scale(.78); } .object-star { right: 14%; top: 23%; transform: scale(.72); } .object-feather { left: 19%; top: 38%; transform: rotate(-35deg) scale(.8); } .object-apple { right: 14%; bottom: 22%; } .object-book { left: 46%; top: 10%; transform: rotate(8deg); } .object-cup { right: 16%; bottom: 39%; transform: scale(.78); }
 @keyframes pulse { to { transform: scale(1.4); } }
 .found-message, .solved-message { position: absolute; inset: 25%; z-index: 3; border-radius: 22px; background: rgba(255,255,255,.92); box-shadow: 0 20px 70px rgba(0,0,0,.14); display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; text-align: center; }
 .found-message strong, .solved-message { font-family: Georgia, serif; font-size: 27px; }
@@ -111,7 +124,7 @@ footer small { text-align: right; opacity: .45; font-size: 10px; }
   .hero { padding: 70px 20px; } .checkin-card { padding: 22px 20px; } .status-row small { display: none; }
   .game-section, .progress-section, .video-section { padding: 72px 20px; }
   .section-intro { grid-template-columns: 1fr; gap: 18px; } .section-intro p { padding-left: 57px; }
-  .focus-field, .meadow-grid { height: 360px; min-height: 360px; } .meadow-grid { padding: 28px 15px; grid-template-columns: repeat(5, 1fr); } .meadow-grid > button:nth-last-child(-n+5) { display: none; }
+  .focus-field, .room-scene { height: 360px; min-height: 360px; } .room-sofa { left: 24%; width: 50%; } .room-frame { right: 6%; width: 17%; } .room-plant { display: none; }
   .found-message { inset: 24% 9%; } .puzzle-layout { grid-template-columns: 1fr; padding: 16px; } .scene-picker { flex-direction: row; overflow: auto; } .scene-picker > span { display: none; } .scene-picker button { flex: 0 0 auto; } .scene-picker button span { display: none; }
   .progress-card { padding: 25px 18px 18px; } .chart { gap: 5px; padding-left: 0; padding-right: 0; } .video-grid { grid-template-columns: 1fr; }
   footer { margin-top: 20px; grid-template-columns: 1fr; gap: 12px; text-align: center; } footer p, footer small { text-align: center; }

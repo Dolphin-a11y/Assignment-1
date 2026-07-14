@@ -44,7 +44,7 @@ const videos = [
 
 function stressInfo(level: number) {
   if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", color: "#2f7d63", game: "Focus Sprint" };
-  if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#b86b37", game: "Hidden Meadow" };
+  if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#b86b37", game: "Hidden Object Room" };
   return { key: "high", label: "Feeling overloaded", note: "No rush. Settle into something slow and tactile.", color: "#6a5d9d", game: "Quiet Jigsaw" };
 }
 
@@ -93,14 +93,31 @@ function FocusGame() {
 function FindGame() {
   const [round, setRound] = useState(0);
   const [found, setFound] = useState(false);
-  const hiddenAt = useMemo(() => Math.floor(Math.random() * 35), [round]);
+  const objects = [
+    { name: "golden key", icon: "🔑", position: "object-key" },
+    { name: "tiny star", icon: "⭐", position: "object-star" },
+    { name: "blue feather", icon: "🪶", position: "object-feather" },
+    { name: "red apple", icon: "🍎", position: "object-apple" },
+    { name: "little book", icon: "📕", position: "object-book" },
+    { name: "tea cup", icon: "☕", position: "object-cup" },
+  ];
+  const hiddenAt = useMemo(() => round % 3, [round]);
+  const target = objects[hiddenAt];
   function next() { setFound(false); setRound((r) => r + 1); }
   return (
     <div className="game-shell find-game">
-      <div className="game-top"><span>Find the tiny leaf among the blooms</span><strong>Round {round + 1}</strong></div>
-      <div className="meadow-grid">
-        {Array.from({ length: 35 }, (_, i) => <button key={i} onClick={() => i === hiddenAt && setFound(true)} aria-label={i === hiddenAt ? "Hidden leaf" : "Flower"} className={found && i === hiddenAt ? "found" : ""}>{i === hiddenAt ? "☘" : ["✿", "❀", "✽"][i % 3]}</button>)}
-        {found && <div className="found-message"><strong>You found it!</strong><span>Notice that tiny moment of focus.</span><button onClick={next}>New meadow</button></div>}
+      <div className="game-top"><span>Find the {target.name} hidden in the room</span><strong>Round {round + 1}</strong></div>
+      <div className="room-scene">
+        <div className="room-window"><span /><span /></div>
+        <div className="room-frame">☁</div>
+        <div className="room-shelf"><i /><i /><i /></div>
+        <div className="room-lamp"><i /></div>
+        <div className="room-sofa"><span /><span /></div>
+        <div className="room-table" />
+        <div className="room-rug" />
+        <div className="room-plant">♧</div>
+        {objects.map((item, i) => <button key={item.name} type="button" onClick={() => i === hiddenAt && setFound(true)} aria-label={item.name} className={`room-object ${item.position}${found && i === hiddenAt ? " found" : ""}`}>{item.icon}</button>)}
+        {found && <div className="found-message"><strong>You found it!</strong><span>One small detail brought you into the moment.</span><button onClick={next}>Explore a new room</button></div>}
       </div>
     </div>
   );
@@ -200,7 +217,7 @@ export default function Home() {
       </section>
 
       <section className="game-section">
-        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let the busy thoughts soften while your eyes search the meadow." : "Piece by piece. There is nothing to hurry and nowhere else to be."}</p></div>
+        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "Piece by piece. There is nothing to hurry and nowhere else to be."}</p></div>
         {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <PuzzleGame />}
       </section>
 
