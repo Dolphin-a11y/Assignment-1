@@ -17,7 +17,8 @@ html = html.replace("</head>", '<link rel="stylesheet" href="/rhythm.css?v=1"></
 html = html.replace("</head>", '<link rel="stylesheet" href="/bemuse.css?v=1"></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/custom-rhythm-embed.css?v=1"></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/jigsaw-embed.css?v=1"></head>');
-html = html.replace("</body>", '<script src="/standalone.js?v=ocean-jigsaw-v25" defer></script></body>');
+html = html.replace("</head>", '<link rel="stylesheet" href="/chess-embed.css?v=1"></head>');
+html = html.replace("</body>", '<script src="/standalone.js?v=calm-chess-v26" defer></script></body>');
 
 await writeFile(path, html, "utf8");
 console.log("Prepared standalone static page");

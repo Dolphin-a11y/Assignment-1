@@ -42,7 +42,7 @@ const videos = [
 ];
 
 function stressInfo(level: number) {
-  if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", color: "#2f7d63", game: "Focus Sprint" };
+  if (level <= 3) return { key: "low", label: "Calm & steady", note: "Invite a friend into a quiet game together.", color: "#2f5141", game: "Calm Chess" };
   if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#6f927f", game: "Your 3D Jigsaw" };
   return { key: "high", label: "Feeling overloaded", note: "No rush. Turn a familiar song into a gentle focus game.", color: "#6a5d9d", game: "Your Song Rhythm" };
 }
@@ -282,6 +282,15 @@ function Jigsaw3DGame() {
   );
 }
 
+function CalmChessGame() {
+  return (
+    <div className="game-shell calm-chess-game">
+      <div className="game-top"><span>Create a room or join with a friend’s code</span><strong>Two-player online chess</strong></div>
+      <iframe className="chess-frame" src="/chess-room.html?v=1" title="Two-player chess room" />
+    </div>
+  );
+}
+
 function PuzzleGame() {
   const [tiles, setTiles] = useState(() => shuffle());
   const [selected, setSelected] = useState<number | null>(null);
@@ -376,8 +385,8 @@ export default function Home() {
       </section>
 
       <section className="game-section">
-        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Slow down with a tactile 3D puzzle made from a Drift image or one of your own." : "Choose a song you enjoy and turn it into a private four-lane rhythm challenge."}</p></div>
-        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <Jigsaw3DGame /> : <CustomSongRhythmGame />}
+        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "Create a room code, invite a friend, and take turns moving black and white pieces at an unhurried pace." : info.key === "moderate" ? "Slow down with a tactile 3D puzzle made from a Drift image or one of your own." : "Choose a song you enjoy and turn it into a private four-lane rhythm challenge."}</p></div>
+        {info.key === "low" ? <CalmChessGame /> : info.key === "moderate" ? <Jigsaw3DGame /> : <CustomSongRhythmGame />}
       </section>
 
       <section className="video-section">

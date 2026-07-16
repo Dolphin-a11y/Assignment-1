@@ -121,6 +121,7 @@ h2 { font-size: clamp(36px, 5vw, 55px); margin-top: 7px; }
 .bemuse-actions { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; gap: 25px; color: #eee9ff; background: #28233c; }.bemuse-actions>div:first-child { display: flex; flex-direction: column; gap: 5px; }.bemuse-actions strong { font-family: Georgia, serif; font-size: 18px; }.bemuse-actions span { max-width: 660px; color: #eee9ff9c; font-size: 12px; line-height: 1.5; }.bemuse-actions>div:last-child { display: flex; gap: 9px; flex: none; }.bemuse-actions a { padding: 10px 14px; border-radius: 99px; color: #28233c; background: #d9cffa; text-decoration: none; font-size: 12px; font-weight: 700; }.bemuse-actions .bemuse-source { color: #eee9ff; border: 1px solid #eee9ff38; background: transparent; }
 .custom-rhythm-frame { width: 100%; height: 760px; border: 0; display: block; background: #19152b; }
 .jigsaw-frame { width: 100%; height: 830px; border: 0; display: block; background: #e9e1d4; }
+.chess-frame { width: 100%; height: 900px; border: 0; display: block; background: #ebe7df; }
 @keyframes pulse { to { transform: scale(1.4); } }
 .found-message, .solved-message { position: absolute; inset: 25%; z-index: 3; border-radius: 22px; background: rgba(255,255,255,.92); box-shadow: 0 20px 70px rgba(0,0,0,.14); display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; text-align: center; }
 .found-message strong, .solved-message { font-family: Georgia, serif; font-size: 27px; }
@@ -166,6 +167,7 @@ footer small { text-align: right; opacity: .45; font-size: 10px; }
 @media (max-width: 760px) {
   .custom-rhythm-frame { height: 680px; }
   .jigsaw-frame { height: 900px; }
+  .chess-frame { height: 1080px; }
   nav { padding: 0 20px; height: 72px; } .nav-actions { gap: 8px; } .nav-actions .progress-link { display: inline-flex; padding: 8px 12px; font-size: 12px; } .sound { font-size: 0; } .sound span { font-size: 15px; }
   .hero { padding: 70px 20px; } .checkin-card { padding: 22px 20px; } .status-row small { display: none; }
   .game-section, .progress-section, .video-section { padding: 72px 20px; }

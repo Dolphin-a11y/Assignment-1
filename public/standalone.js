@@ -33,7 +33,7 @@
   let currentMode = "";
 
   function stressInfo(level) {
-    if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", game: "Focus Sprint", copy: "A playful burst to channel your energy into one simple target." };
+    if (level <= 3) return { key: "low", label: "Calm & steady", note: "Invite a friend into a quiet game together.", game: "Calm Chess", copy: "Create a room code, invite a friend, and take turns moving black and white pieces at an unhurried pace." };
     if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", game: "Your 3D Jigsaw", copy: "Slow down with a tactile 3D puzzle made from a Drift image or one of your own." };
     return { key: "high", label: "Feeling overloaded", note: "No rush. Turn a familiar song into a gentle focus game.", game: "Your Song Rhythm", copy: "Choose a song you enjoy and turn it into a private four-lane rhythm challenge." };
   }
@@ -259,6 +259,10 @@
     gameShell().outerHTML = `<div class="game-shell jigsaw-3d-game"><div class="game-top"><span>Choose the ocean image or upload your own</span><strong>3D jigsaw puzzle</strong></div><iframe class="jigsaw-frame" src="./jigsaw-3d.html?v=2" title="Upload an image and play a 3D jigsaw puzzle"></iframe></div>`;
   }
 
+  function renderCalmChess() {
+    gameShell().outerHTML = `<div class="game-shell calm-chess-game"><div class="game-top"><span>Create a room or join with a friend’s code</span><strong>Two-player online chess</strong></div><iframe class="chess-frame" src="./chess-room.html?v=1" title="Two-player chess room"></iframe></div>`;
+  }
+
   function renderExperience(force = false) {
     const info = stressInfo(stress);
     app.className = `app theme-${info.key}`;
@@ -270,7 +274,7 @@
     gameCopy.textContent = info.copy;
     if (!force && currentMode === info.key) return;
     currentMode = info.key;
-    if (info.key === "low") renderFocus();
+    if (info.key === "low") renderCalmChess();
     else if (info.key === "moderate") renderJigsaw3D();
     else renderCustomSongRhythm();
     if (soundOn) restartSound();
