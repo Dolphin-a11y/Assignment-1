@@ -1,6 +1,8 @@
 import { initialState, legalMoves, makeMove, squareName } from "./chess-rules.js";
 
-const API = location.hostname.endsWith("github.io") ? "https://drift-mindful-pause.ljade1107.chatgpt.site/api/chess" : "./api/chess";
+const IS_GITHUB = location.hostname.endsWith("github.io");
+const LIVE_CHESS = "https://drift-mindful-pause.ljade1107.chatgpt.site/chess-room.html";
+const API = IS_GITHUB ? `${LIVE_CHESS.replace("/chess-room.html", "")}/api/chess` : "./api/chess";
 const symbols = { wk:"♔", wq:"♕", wr:"♖", wb:"♗", wn:"♘", wp:"♙", bk:"♚", bq:"♛", br:"♜", bb:"♝", bn:"♞", bp:"♟" };
 const modeChoice = document.querySelector("#mode-choice"); const friendLobby = document.querySelector("#friend-lobby"); const aiChoice = document.querySelector("#ai-choice");
 const game = document.querySelector("#game"); const boardElement = document.querySelector("#chess-board");
@@ -8,6 +10,10 @@ const notice = document.querySelector("#notice"); const feedback = document.quer
 let mode = ""; let code = ""; let token = ""; let color = "w"; let state = null; let ready = false; let version = 0; let selected = null; let poller = 0; let aiTimer = 0; let aiThinking = false;
 
 function showNotice(message) { notice.textContent = message; notice.hidden = false; clearTimeout(showNotice.timer); showNotice.timer = setTimeout(() => { notice.hidden = true; }, 3200); }
+function openLiveFriend(roomCode = "") {
+  const target = `${LIVE_CHESS}?mode=friend${roomCode ? `&code=${encodeURIComponent(roomCode)}` : ""}`;
+  window.top.location.assign(target);
+}
 async function request(method, payload, query = "") {
   const response = await fetch(`${API}${query}`, { method, credentials:"include", headers: method === "POST" ? { "content-type":"application/json" } : {}, body: method === "POST" ? JSON.stringify(payload) : undefined });
   const data = await response.json().catch(() => ({ error:"The room service did not respond" }));
@@ -111,12 +117,12 @@ async function refresh() {
 function showModes() { clearInterval(poller); clearTimeout(aiTimer); code = ""; token = ""; state = null; mode = ""; aiThinking = false; clearSession(); game.hidden = true; friendLobby.hidden = true; aiChoice.hidden = true; modeChoice.hidden = false; }
 
 document.querySelector("#choose-ai").addEventListener("click", () => { modeChoice.hidden = true; aiChoice.hidden = false; });
-document.querySelector("#choose-friend").addEventListener("click", () => { modeChoice.hidden = true; friendLobby.hidden = false; });
+document.querySelector("#choose-friend").addEventListener("click", () => { if (IS_GITHUB) return openLiveFriend(); modeChoice.hidden = true; friendLobby.hidden = false; });
 document.querySelectorAll("[data-back]").forEach((button) => button.addEventListener("click", showModes));
 document.querySelector("#ai-white").addEventListener("click", () => startAiGame("w"));
 document.querySelector("#ai-black").addEventListener("click", () => startAiGame("b"));
-document.querySelector("#create-room").addEventListener("click", async () => { try { const data = await request("POST", { action:"create" }); enterRoom(data, "w", data.token); } catch (error) { showNotice(error.message); } });
-document.querySelector("#join-form").addEventListener("submit", async (event) => { event.preventDefault(); const requestedCode = document.querySelector("#room-code-input").value.trim().toUpperCase(); try { const data = await request("POST", { action:"join", code:requestedCode }); enterRoom(data, "b", data.token); } catch (error) { showNotice(error.message); } });
+document.querySelector("#create-room").addEventListener("click", async () => { if (IS_GITHUB) return openLiveFriend(); try { const data = await request("POST", { action:"create" }); enterRoom(data, "w", data.token); } catch (error) { showNotice(error.message); } });
+document.querySelector("#join-form").addEventListener("submit", async (event) => { event.preventDefault(); const requestedCode = document.querySelector("#room-code-input").value.trim().toUpperCase(); if (IS_GITHUB) return openLiveFriend(requestedCode); try { const data = await request("POST", { action:"join", code:requestedCode }); enterRoom(data, "b", data.token); } catch (error) { showNotice(error.message); } });
 document.querySelector("#room-code-input").addEventListener("input", (event) => { event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); });
 document.querySelector("#copy-code").addEventListener("click", async () => { await navigator.clipboard.writeText(code); showNotice("Room code copied"); });
 document.querySelector("#leave-room").addEventListener("click", showModes);
@@ -127,3 +133,7 @@ document.querySelector("#reset-game").addEventListener("click", async () => {
 
 const saved = JSON.parse(sessionStorage.getItem("driftChessRoom") || "null");
 if (saved?.code && saved?.token && ["w","b"].includes(saved.color)) request("GET", null, `?code=${encodeURIComponent(saved.code)}`).then((data) => enterRoom(data, saved.color, saved.token)).catch(clearSession);
+else {
+  const params = new URLSearchParams(location.search);
+  if (params.get("mode") === "friend") { modeChoice.hidden = true; friendLobby.hidden = false; document.querySelector("#room-code-input").value = (params.get("code") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6); }
+}

@@ -26,6 +26,6 @@ html = html.replace("</head>", '<link rel="stylesheet" href="/bemuse.css?v=1"></
 html = html.replace("</head>", '<link rel="stylesheet" href="/custom-rhythm-embed.css?v=1"></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/jigsaw-embed.css?v=1"></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/chess-embed.css?v=1"></head>');
-html = html.replace("</body>", '<script src="/standalone.js?v=ai-or-friend-v28" defer></script></body>');
+html = html.replace("</body>", '<script src="/standalone.js?v=friend-room-fix-v29" defer></script></body>');
 await writeFile(new URL("../public/index.html", import.meta.url), html, "utf8");
 console.log("Exported public/index.html");
