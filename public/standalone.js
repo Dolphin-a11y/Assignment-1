@@ -11,6 +11,10 @@
   const gameCopy = gameSection.querySelector(".section-intro > p");
   const gameShell = () => gameSection.querySelector(".game-shell");
 
+  const removedVideo = document.querySelector('iframe[src*="xNN7iTA57jM"]')?.closest(".video-card");
+  if (removedVideo) removedVideo.remove();
+  document.querySelector(".video-grid")?.classList.add("two-videos");
+
   const puzzleImages = [
     { name: "Misty lake", url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd4297?auto=format&fit=crop&w=900&q=85" },
     { name: "Forest light", url: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=900&q=85" },

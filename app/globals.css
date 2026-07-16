@@ -140,7 +140,7 @@ h2 { font-size: clamp(36px, 5vw, 55px); margin-top: 7px; }
 @keyframes rise { from { height: 0; } }
 .empty-note { text-align: center; opacity: .55; font-size: 12px; }
 .video-section { padding-top: 40px; }
-.video-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.video-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; max-width: 820px; margin: 0 auto; }
 .video-card { border-radius: 22px; overflow: hidden; background: #efd8c9; }
 .video-card.blue { background: #cfdee5; } .video-card.green { background: #d3dfce; }
 .video-frame { aspect-ratio: 16/10; background: #ddd; }

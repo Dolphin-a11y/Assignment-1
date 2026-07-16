@@ -39,7 +39,6 @@ const puzzleImages = [
 const videos = [
   { title: "5-minute guided breathing", length: "5 min", id: "inpok4MKVLM", tone: "peach" },
   { title: "Calm your mind meditation", length: "10 min", id: "O-6f5wQXSu8", tone: "blue" },
-  { title: "Gentle forest ambience", length: "30 min", id: "xNN7iTA57jM", tone: "green" },
 ];
 
 function stressInfo(level: number) {
