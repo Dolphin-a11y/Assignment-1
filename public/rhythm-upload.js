@@ -24,6 +24,8 @@
   let playing = false;
   let animation = null;
   let seed = 1;
+  let beatCandidates = [];
+  let analysisToken = 0;
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -35,15 +37,76 @@
   function random() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
   function hash(text) { let value = 2166136261; for (const char of text) value = Math.imul(value ^ char.charCodeAt(0), 16777619); return value >>> 0; }
 
+  async function analyseBeats(file, token) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) throw new Error("Audio analysis is not supported in this browser.");
+    const audioContext = new AudioContextClass();
+    try {
+      const buffer = await audioContext.decodeAudioData(await file.arrayBuffer());
+      if (token !== analysisToken) return;
+      const channelA = buffer.getChannelData(0);
+      const channelB = buffer.numberOfChannels > 1 ? buffer.getChannelData(1) : channelA;
+      const hop = 1024;
+      const envelope = [];
+      const brightness = [];
+      for (let offset = 0; offset + hop < buffer.length; offset += hop) {
+        let power = 0;
+        let movement = 0;
+        let previous = (channelA[offset] + channelB[offset]) * .5;
+        for (let index = offset; index < offset + hop; index += 2) {
+          const sample = (channelA[index] + channelB[index]) * .5;
+          power += sample * sample;
+          movement += Math.abs(sample - previous);
+          previous = sample;
+        }
+        envelope.push(Math.sqrt(power / (hop / 2)));
+        brightness.push(movement / (hop / 2));
+      }
+
+      const novelty = envelope.map((energy, index) => {
+        let local = 0;
+        let count = 0;
+        for (let back = Math.max(0, index - 16); back < index; back++) { local += envelope[back]; count += 1; }
+        local /= Math.max(count, 1);
+        return Math.max(0, energy - local * 1.08) + Math.max(0, energy - (envelope[index - 1] || 0)) * .65;
+      });
+      const strengths = novelty.filter((value) => value > 0).sort((a, b) => a - b);
+      const floor = strengths[Math.floor(strengths.length * .48)] || 0;
+      beatCandidates = [];
+      for (let index = 2; index < novelty.length - 2; index++) {
+        if (novelty[index] < floor || novelty[index] < novelty[index - 1] || novelty[index] < novelty[index + 1]) continue;
+        beatCandidates.push({
+          time: index * hop / buffer.sampleRate,
+          strength: novelty[index],
+          brightness: brightness[index],
+        });
+      }
+      if (beatCandidates.length < 8) throw new Error("Not enough musical peaks were detected. Try another song.");
+      const minutes = Math.floor(buffer.duration / 60);
+      const seconds = Math.floor(buffer.duration % 60).toString().padStart(2, "0");
+      fileStatus.textContent = `${file.name} · ${minutes}:${seconds} · ${beatCandidates.length} beats found`;
+      startButton.disabled = false;
+      panel.querySelector("h1").textContent = "Song ready";
+      panel.querySelector("p").textContent = "The notes now follow the song’s detected beats and energy peaks.";
+    } finally {
+      await audioContext.close();
+    }
+  }
+
   function createChart() {
-    const intervals = { easy: 0.76, normal: 0.54, hard: 0.38 };
-    const interval = intervals[difficulty.value];
+    const minimumGaps = { easy: .58, normal: .36, hard: .22 };
+    const percentiles = { easy: .68, normal: .42, hard: .18 };
+    const strengths = beatCandidates.map((beat) => beat.strength).sort((a, b) => a - b);
+    const threshold = strengths[Math.floor(strengths.length * percentiles[difficulty.value])] || 0;
     seed = hash(`${fileInput.files[0]?.name || "song"}-${difficulty.value}`);
     notes = [];
-    for (let time = 1.8, index = 0; time < Math.max(audio.duration - 0.5, 2); time += interval, index++) {
-      const lane = Math.floor(random() * 4);
-      notes.push({ time, lane, hit: false, missed: false });
-      if (difficulty.value === "hard" && index % 12 === 8) notes.push({ time, lane: (lane + 2) % 4, hit: false, missed: false });
+    let previousTime = -10;
+    for (const beat of beatCandidates) {
+      if (beat.strength < threshold || beat.time - previousTime < minimumGaps[difficulty.value]) continue;
+      const lane = Math.abs(Math.floor(beat.brightness * 10000 + random() * 4)) % 4;
+      notes.push({ time: beat.time, lane, hit: false, missed: false });
+      if (difficulty.value === "hard" && beat.strength > threshold * 2.15) notes.push({ time: beat.time, lane: (lane + 2) % 4, hit: false, missed: false });
+      previousTime = beat.time;
     }
   }
 
@@ -119,11 +182,21 @@
     panel.querySelector("h1").textContent = "Song complete"; panel.querySelector("p").textContent = `Score ${score.toLocaleString()} · Best combo ${maxCombo}`; startButton.textContent = "Play again";
   }
 
-  fileInput.addEventListener("change", () => {
+  fileInput.addEventListener("change", async () => {
     const file = fileInput.files[0]; if (!file) return;
     if (fileUrl) URL.revokeObjectURL(fileUrl); fileUrl = URL.createObjectURL(file); audio.src = fileUrl;
-    songName.textContent = file.name; fileStatus.textContent = "Reading song…"; startButton.disabled = true;
-    audio.addEventListener("loadedmetadata", () => { const minutes = Math.floor(audio.duration / 60); const seconds = Math.floor(audio.duration % 60).toString().padStart(2, "0"); fileStatus.textContent = `${file.name} · ${minutes}:${seconds}`; startButton.disabled = false; panel.querySelector("h1").textContent = "Song ready"; panel.querySelector("p").textContent = "The chart will be generated locally when you press Start."; }, { once: true });
+    const token = ++analysisToken;
+    beatCandidates = [];
+    songName.textContent = file.name; fileStatus.textContent = "Analysing beats and energy…"; startButton.disabled = true;
+    panel.querySelector("h1").textContent = "Listening for the beat";
+    panel.querySelector("p").textContent = "This local analysis may take a moment for a long song.";
+    try { await analyseBeats(file, token); }
+    catch (error) {
+      if (token !== analysisToken) return;
+      fileStatus.textContent = error.message || "This song could not be analysed.";
+      panel.querySelector("h1").textContent = "Try another song";
+      panel.querySelector("p").textContent = "MP3, WAV and OGG files work best for beat detection.";
+    }
   });
   startButton.addEventListener("click", startGame);
   pauseButton.addEventListener("click", () => { if (audio.paused) { audio.play(); playing = true; pauseButton.textContent = "Pause"; draw(); } else { audio.pause(); playing = false; pauseButton.textContent = "Continue"; } });
