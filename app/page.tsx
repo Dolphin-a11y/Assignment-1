@@ -44,7 +44,7 @@ const videos = [
 function stressInfo(level: number) {
   if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", color: "#2f7d63", game: "Focus Sprint" };
   if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#b86b37", game: "Hidden Object Room" };
-  return { key: "high", label: "Feeling overloaded", note: "No rush. Follow one gentle beat at a time.", color: "#6a5d9d", game: "Gentle Rhythm" };
+  return { key: "high", label: "Feeling overloaded", note: "No rush. Let the music hold your attention for a while.", color: "#6a5d9d", game: "Bemuse Rhythm Game" };
 }
 
 function shuffle(size = 9) {
@@ -264,6 +264,18 @@ function RhythmGame() {
   );
 }
 
+function BemuseGame() {
+  return (
+    <div className="game-shell bemuse-game">
+      <div className="game-top"><span>Open-source browser rhythm game</span><strong>Powered by Bemuse</strong></div>
+      <div className="bemuse-frame-wrap">
+        <iframe src="https://bemuse.ninja/" title="Bemuse rhythm game" allow="autoplay; fullscreen; gamepad" allowFullScreen />
+      </div>
+      <div className="bemuse-actions"><div><strong>Bemuse — beat☆music☆sequence</strong><span>Best experienced in Google Chrome. Select a song, then follow the falling notes with your keyboard.</span></div><div><a href="https://bemuse.ninja/" target="_blank" rel="noreferrer">Open full screen ↗</a><a className="bemuse-source" href="https://github.com/bemusic/bemuse" target="_blank" rel="noreferrer">Source · AGPL-3.0</a></div></div>
+    </div>
+  );
+}
+
 function PuzzleGame() {
   const [tiles, setTiles] = useState(() => shuffle());
   const [selected, setSelected] = useState<number | null>(null);
@@ -358,8 +370,8 @@ export default function Home() {
       </section>
 
       <section className="game-section">
-        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "Let one soft musical pattern hold your attention, then echo it back at your own pace."}</p></div>
-        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <RhythmGame />}
+        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "Choose a song and redirect your attention into Bemuse’s full keyboard rhythm experience."}</p></div>
+        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <BemuseGame />}
       </section>
 
       <section className="video-section">
