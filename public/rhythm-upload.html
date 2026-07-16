@@ -5,7 +5,7 @@
   <main class="rhythm-app">
     <header><div><span>Score</span><strong id="score">000000</strong></div><div class="song-title"><span>Your Song Rhythm</span><strong id="song-name">Choose a local song</strong></div><div><span>Combo</span><strong id="combo">0</strong></div><button id="pause" type="button" disabled>Pause</button></header>
     <section class="game-stage">
-      <canvas id="rhythm-canvas" aria-label="Four lane rhythm game"></canvas>
+      <canvas id="rhythm-canvas" tabindex="0" aria-label="Four lane rhythm game controlled with keyboard keys"></canvas>
       <div class="judgement" id="judgement" aria-live="polite">Ready</div>
       <div class="upload-panel" id="upload-panel">
         <div class="upload-icon">♫</div><h1>Play a song you love</h1><p>Select an audio file. It stays on this device and is never uploaded.</p>
@@ -19,10 +19,10 @@
         <div class="key-guide"><span><button class="key-bind" data-lane="0" type="button">D</button> Rain</span><span><button class="key-bind" data-lane="1" type="button">F</button> Glow</span><span><button class="key-bind" data-lane="2" type="button">J</button> Wave</span><span><button class="key-bind" data-lane="3" type="button">K</button> Star</span></div>
         <details class="key-settings"><summary>Change keys</summary><div class="key-settings-panel"><strong>Custom key controls</strong><p id="key-status">Choose a lane key, then press a new letter or number.</p><button id="reset-keys" type="button">Reset to D F J K</button></div></details>
       </div>
-      <p>Tap lanes or use your chosen keys · Original Drift rhythm game</p>
+      <p>Keyboard only: use your chosen keys or ← ↓ ↑ →</p>
     </footer>
     <audio id="song-audio" preload="metadata"></audio>
   </main>
-  <script src="./rhythm-upload.js?v=tempo-sync-v11" defer></script>
+  <script src="./rhythm-upload.js?v=keyboard-only-v13" defer></script>
 </body>
 </html>

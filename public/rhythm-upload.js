@@ -14,6 +14,7 @@
   const judgement = document.querySelector("#judgement");
   const colors = ["#4fc3f7", "#ff9acb", "#70d6a8", "#b89cff"];
   const defaultKeys = ["d", "f", "j", "k"];
+  const arrowKeys = ["arrowleft", "arrowdown", "arrowup", "arrowright"];
   let keys = [...defaultKeys];
   try {
     const savedKeys = JSON.parse(localStorage.getItem("drift-rhythm-keys"));
@@ -309,7 +310,7 @@
 
   function startGame() {
     createChart(); score = 0; combo = 0; maxCombo = 0; pendingSlide = null; activeHolds.clear(); laneFlashes.fill(0); updateStats(); audio.currentTime = 0; panel.classList.add("hidden"); pauseButton.disabled = false; pauseButton.textContent = "Pause";
-    audio.play().then(() => { playing = true; cancelAnimationFrame(animation); draw(); }).catch(() => { panel.classList.remove("hidden"); fileStatus.textContent = "Press Start again to allow audio"; });
+    audio.play().then(() => { playing = true; canvas.focus(); showJudgement(`Keys ready: ${keys.map((key) => key.toUpperCase()).join(" ")}`, "#70d6ff"); cancelAnimationFrame(animation); draw(); }).catch(() => { panel.classList.remove("hidden"); fileStatus.textContent = "Press Start again to allow audio"; });
   }
 
   function finishGame() {
@@ -367,13 +368,8 @@
       keyStatus.textContent = `Saved: ${keys.map((key) => key.toUpperCase()).join(" · ")}`;
       return;
     }
-    const lane = keys.indexOf(pressed); if (lane >= 0) { event.preventDefault(); if (!event.repeat) hitLane(lane); }
+    let lane = keys.indexOf(pressed); if (lane < 0) lane = arrowKeys.indexOf(pressed); if (lane >= 0) { event.preventDefault(); if (!event.repeat) hitLane(lane); }
   });
-  window.addEventListener("keyup", (event) => { const lane = keys.indexOf(event.key.toLowerCase()); if (lane >= 0) releaseLane(lane); });
-  let pointerLane = null;
-  function laneFromPointer(event) { const rect = canvas.getBoundingClientRect(); const left = rect.width * .045; const trackWidth = rect.width * .91; return Math.max(0, Math.min(3, Math.floor(((event.clientX - rect.left) - left) / (trackWidth / 4)))); }
-  canvas.addEventListener("pointerdown", (event) => { pointerLane = laneFromPointer(event); canvas.setPointerCapture?.(event.pointerId); hitLane(pointerLane); });
-  canvas.addEventListener("pointermove", (event) => { if (pointerLane === null || !event.buttons) return; const nextLane = laneFromPointer(event); if (nextLane !== pointerLane) { pointerLane = nextLane; hitLane(nextLane); } });
-  canvas.addEventListener("pointerup", () => { if (pointerLane !== null) releaseLane(pointerLane); pointerLane = null; });
+  window.addEventListener("keyup", (event) => { const pressed = event.key.toLowerCase(); let lane = keys.indexOf(pressed); if (lane < 0) lane = arrowKeys.indexOf(pressed); if (lane >= 0) releaseLane(lane); });
   window.addEventListener("resize", resize); updateKeyLabels(); resize(); draw();
 })();

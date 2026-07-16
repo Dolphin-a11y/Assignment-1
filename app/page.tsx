@@ -267,8 +267,8 @@ function RhythmGame() {
 function CustomSongRhythmGame() {
   return (
     <div className="game-shell custom-rhythm-game">
-        <div className="game-top"><span>Notes follow the uploaded song’s rhythm and tempo</span><strong>Automatic BPM sync</strong></div>
-        <iframe className="custom-rhythm-frame" src="/rhythm-upload.html?v=tempo-sync-v11" title="Upload your own song rhythm game" allow="autoplay" />
+        <div className="game-top"><span>Play notes with computer keys — not the mouse</span><strong>Keyboard-only gameplay</strong></div>
+        <iframe className="custom-rhythm-frame" src="/rhythm-upload.html?v=keyboard-only-v13" title="Upload your own song rhythm game" allow="autoplay" />
     </div>
   );
 }
