@@ -1,0 +1,32 @@
+.piece-set {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 70px;
+  margin-bottom: 22px;
+  border-radius: 18px;
+  font-family: "Segoe UI Symbol", "Arial Unicode MS", serif;
+  font-size: clamp(27px, 4vw, 43px);
+  letter-spacing: .06em;
+  line-height: 1;
+}
+
+.white-set {
+  color: #fff;
+  background: #809087;
+  text-shadow: -1px -1px 0 #26372f, 1px -1px 0 #26372f, -1px 1px 0 #26372f, 1px 1px 0 #26372f;
+}
+
+.black-set {
+  color: #17211c;
+  background: #dfe4df;
+  text-shadow: 0 1px 0 #fff;
+}
+
+@media (max-width: 760px) {
+  .piece-set {
+    min-height: 58px;
+    margin-bottom: 13px;
+  }
+}

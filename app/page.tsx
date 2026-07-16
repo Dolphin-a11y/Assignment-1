@@ -286,7 +286,7 @@ function CalmChessGame() {
   return (
     <div className="game-shell calm-chess-game">
       <div className="game-top"><span>Create a room or join with a friend’s code</span><strong>Two-player online chess</strong></div>
-      <iframe className="chess-frame" src="/chess-room.html?v=1" title="Two-player chess room" />
+      <iframe className="chess-frame" src="/chess-room.html?v=2" title="Two-player chess room" />
     </div>
   );
 }

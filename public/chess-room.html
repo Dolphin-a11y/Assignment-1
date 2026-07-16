@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Drift Calm Chess</title>
   <link rel="stylesheet" href="./chess-room.css?v=1">
+  <link rel="stylesheet" href="./chess-pieces.css?v=1">
 </head>
 <body>
   <main class="chess-app">
     <header><div><span>Calm activity</span><h1>A quiet game together</h1></div><p>Take turns. Notice the board. There is no need to rush.</p></header>
 
     <section class="lobby" id="lobby">
-      <div class="lobby-card create-card"><span class="piece-mark">♙</span><div><strong>Start a room</strong><p>You play White. Send the six-character code to a friend.</p></div><button id="create-room" type="button">Create room</button></div>
+      <div class="lobby-card create-card"><div class="piece-set white-set" aria-label="White king, queen, rook, bishop, knight and pawn">♔ ♕ ♖ ♗ ♘ ♙</div><div><strong>Start a room</strong><p>You play White with the full set: king, queen, rooks, bishops, knights and pawns.</p></div><button id="create-room" type="button">Create room</button></div>
       <div class="or"><span>or</span></div>
-      <form class="lobby-card join-card" id="join-form"><span class="piece-mark dark">♟</span><div><strong>Join a friend</strong><p>Enter their room code. You will play Black.</p></div><label>Room code<input id="room-code-input" maxlength="6" autocomplete="off" spellcheck="false" placeholder="ABC234" required></label><button type="submit">Join room</button></form>
+      <form class="lobby-card join-card" id="join-form"><div class="piece-set black-set" aria-label="Black king, queen, rook, bishop, knight and pawn">♚ ♛ ♜ ♝ ♞ ♟</div><div><strong>Join a friend</strong><p>You play Black with the same complete set of standard chess pieces.</p></div><label>Room code<input id="room-code-input" maxlength="6" autocomplete="off" spellcheck="false" placeholder="ABC234" required></label><button type="submit">Join room</button></form>
     </section>
 
     <section class="game" id="game" hidden>
@@ -33,6 +34,6 @@
     <div class="notice" id="notice" role="alert" hidden></div>
     <footer><span>Two players · synchronized room · touch or click to move</span><a href="https://github.com/niklasf/python-chess" target="_blank" rel="noreferrer">Rules behavior referenced from python-chess documentation</a></footer>
   </main>
-  <script type="module" src="./chess-room.js?v=1"></script>
+  <script type="module" src="./chess-room.js?v=2"></script>
 </body>
 </html>
