@@ -205,10 +205,26 @@
       if (note.started && note.type === "slide" && current - note.time > .55) { note.missed = true; pendingSlide = null; registerMiss("Missing"); continue; }
       if (!note.started && current - note.time > 0.24) { note.missed = true; registerMiss("Missing"); continue; }
       const y = hitY - ((note.time - current) / travelTime) * (hitY - topY);
-      if (y < -45 || y > height + 30) continue;
+      const holdTailY = note.type === "hold" ? hitY - (((note.time + note.duration) - current) / travelTime) * (hitY - topY) : y;
+      if (note.type === "hold") {
+        if (holdTailY > height + 30 || y < -45) continue;
+      } else if (y < -45 || y > height + 30) continue;
       const bounds = laneBounds(note.lane, Math.max(topY, Math.min(hitY, y)));
       const x = bounds.x + Math.max(5, bounds.width * .08);
       const noteHeight = 28 + Math.min((note.strength || 0) / strongestNote, 1) * 12;
+      if (note.type === "hold") {
+        const holdBottom = Math.min(y + noteHeight, hitY + noteHeight);
+        const holdTop = Math.max(topY - noteHeight, Math.min(holdTailY, holdBottom - noteHeight));
+        const holdHeight = Math.max(noteHeight, holdBottom - holdTop);
+        const holdBounds = laneBounds(note.lane, Math.max(topY, Math.min(hitY, holdBottom)));
+        const holdWidth = holdBounds.width * .84;
+        const holdX = holdBounds.x + (holdBounds.width - holdWidth) / 2;
+        const holdGradient = ctx.createLinearGradient(holdX, holdTop, holdX, holdBottom);
+        holdGradient.addColorStop(0, `${colors[note.lane]}a8`); holdGradient.addColorStop(.72, colors[note.lane]); holdGradient.addColorStop(1, "#ffffff");
+        ctx.fillStyle = holdGradient; ctx.shadowBlur = 24; ctx.shadowColor = colors[note.lane]; roundedRect(holdX, holdTop, holdWidth, holdHeight, 16); ctx.shadowBlur = 0;
+        if (note.started) laneFlashes[note.lane] = Date.now() + 80;
+        continue;
+      }
       const noteWidth = note.type === "slide" ? bounds.width * .54 : bounds.width * .84;
       const noteX = note.type === "slide" ? bounds.x + (bounds.width - noteWidth) / 2 : x;
       const gradient = ctx.createLinearGradient(x, y, x, y + noteHeight);

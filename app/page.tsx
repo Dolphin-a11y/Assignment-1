@@ -267,8 +267,8 @@ function RhythmGame() {
 function CustomSongRhythmGame() {
   return (
     <div className="game-shell custom-rhythm-game">
-        <div className="game-top"><span>Play clean neon notes with the uploaded song</span><strong>Beat-synced rhythm</strong></div>
-        <iframe className="custom-rhythm-frame" src="/rhythm-upload.html?v=blank-notes-v9" title="Upload your own song rhythm game" allow="autoplay" />
+        <div className="game-top"><span>Play clean neon notes with the uploaded song</span><strong>Long hold notes</strong></div>
+        <iframe className="custom-rhythm-frame" src="/rhythm-upload.html?v=long-hold-v10" title="Upload your own song rhythm game" allow="autoplay" />
     </div>
   );
 }
