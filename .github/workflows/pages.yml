@@ -29,7 +29,7 @@ jobs:
           sed -i 's|="/assets/|="./assets/|g' public/index.html
           sed -i 's|="/favicon.svg|="./favicon.svg|g' public/index.html
           sed -i 's|="/standalone.js|="./standalone.js|g' public/index.html
-          sed -i 's|standalone.js"|standalone.js?v=progress-page-v7"|g' public/index.html
+          sed -i 's|standalone.js"|standalone.js?v=front-page-cleanup-v8"|g' public/index.html
           sed -i 's|</head>|<script src="./vendor/Tone.js?v=15.5.27" defer></script></head>|g' public/index.html
           sed -i 's|</head>|<link rel="stylesheet" href="./room.css?v=1"></head>|g' public/index.html
           sed -i 's|</head>|<link rel="stylesheet" href="./room-3d.css?v=1"></head>|g' public/index.html

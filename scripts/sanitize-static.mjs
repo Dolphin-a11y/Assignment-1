@@ -13,7 +13,7 @@ html = html.replace("</head>", '<link rel="stylesheet" href="/breathing.css?v=1"
 html = html.replace("</head>", '<link rel="stylesheet" href="/room-clutter.css?v=1"></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/video-update.css?v=1"></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/nav-update.css?v=1"></head>');
-html = html.replace("</body>", '<script src="/standalone.js?v=progress-page-v7" defer></script></body>');
+html = html.replace("</body>", '<script src="/standalone.js?v=front-page-cleanup-v8" defer></script></body>');
 
 await writeFile(path, html, "utf8");
 console.log("Prepared standalone static page");

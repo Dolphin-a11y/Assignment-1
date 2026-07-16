@@ -270,8 +270,6 @@ export default function Home() {
     setSaved(true); window.setTimeout(() => setSaved(false), 1800);
   }
 
-  const average = checkIns.length ? (checkIns.reduce((sum, item) => sum + item.level, 0) / checkIns.length).toFixed(1) : "—";
-
   return (
     <main className={`app theme-${info.key}`}>
       <div className="ambient ambient-one" /><div className="ambient ambient-two" />
@@ -293,19 +291,8 @@ export default function Home() {
         {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <BreathingGame />}
       </section>
 
-      <section id="progress" className="progress-section">
-        <div className="section-intro"><div><span className="section-number">02</span><div><div className="eyebrow">Your gentle progress</div><h2>Small shifts matter</h2></div></div><p>Saved only on this device. Look for patterns with curiosity, never pressure.</p></div>
-        <div className="progress-card">
-          <div className="chart-head"><div><span>Recent check-ins</span><strong>{checkIns.length ? "Your last seven moments" : "Your journey starts here"}</strong></div><div className="average"><strong>{average}</strong><span>average stress</span></div></div>
-          <div className="chart" aria-label="Recent stress level chart">
-            {(checkIns.length ? checkIns : [{ id: 1, level: 3, time: "First" }, { id: 2, level: 5, time: "Next" }, { id: 3, level: 4, time: "Today" }] as CheckIn[]).map((item, i) => <div className={`bar-wrap ${!checkIns.length ? "placeholder" : ""}`} key={item.id}><span className="bar-value">{item.level}</span><div className="bar" style={{ height: `${item.level * 9}%`, animationDelay: `${i * 70}ms` }} /><small>{item.time}</small></div>)}
-          </div>
-          {!checkIns.length && <p className="empty-note">Save your first check-in above to begin your private progress view.</p>}
-        </div>
-      </section>
-
       <section className="video-section">
-        <div className="section-intro"><div><span className="section-number">03</span><div><div className="eyebrow">Stay a little longer</div><h2>Press play, let go</h2></div></div><p>Choose a guided pause or a quiet backdrop. Whatever feels easiest is enough.</p></div>
+        <div className="section-intro"><div><span className="section-number">02</span><div><div className="eyebrow">Stay a little longer</div><h2>Press play, let go</h2></div></div><p>Choose a guided pause or a quiet backdrop. Whatever feels easiest is enough.</p></div>
         <div className="video-grid">{videos.map((video) => <article className={`video-card ${video.tone}`} key={video.id}><div className="video-frame"><iframe src={`https://www.youtube-nocookie.com/embed/${video.id}?rel=0`} title={video.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /></div><div><span>{video.length}</span><h3>{video.title}</h3></div></article>)}</div>
       </section>
 

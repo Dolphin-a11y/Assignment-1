@@ -13,6 +13,9 @@
 
   const progressLink = document.querySelector('.nav-actions a[href="#progress"]');
   if (progressLink) { progressLink.textContent = "Progress"; progressLink.href = "./progress.html"; progressLink.classList.add("progress-link"); }
+  document.querySelector("#progress")?.remove();
+  const videoSectionNumber = document.querySelector(".video-section .section-number");
+  if (videoSectionNumber) videoSectionNumber.textContent = "02";
 
   const removedVideo = document.querySelector('iframe[src*="xNN7iTA57jM"]')?.closest(".video-card");
   if (removedVideo) removedVideo.remove();
@@ -200,6 +203,7 @@
     let checkIns = [];
     try { checkIns = JSON.parse(localStorage.getItem("drift-checkins") || "[]"); } catch { checkIns = []; }
     const chart = document.querySelector(".chart");
+    if (!chart) return;
     const chartTitle = document.querySelector(".chart-head > div:first-child strong");
     const average = document.querySelector(".average strong");
     const empty = document.querySelector(".empty-note");
