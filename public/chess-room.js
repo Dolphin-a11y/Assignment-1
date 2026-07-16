@@ -1,4 +1,5 @@
 import { initialState, legalMoves, makeMove, squareName } from "./chess-rules.js";
+import { Peer } from "./vendor/room-connection.js";
 
 const symbols = { wk:"♔", wq:"♕", wr:"♖", wb:"♗", wn:"♘", wp:"♙", bk:"♚", bq:"♛", br:"♜", bb:"♝", bn:"♞", bp:"♟" };
 const modeChoice = document.querySelector("#mode-choice");
@@ -219,7 +220,7 @@ function attachConnection(nextConnection, host) {
 }
 
 function ensurePeerLibrary() {
-  if (typeof window.Peer === "function") return true;
+  if (typeof Peer === "function") return true;
   showNotice("The room connection library did not load. Check your internet connection and refresh.");
   return false;
 }
@@ -228,7 +229,7 @@ function createRoom(attempt = 0) {
   if (!ensurePeerLibrary()) return;
   destroyPeer();
   code = randomCode(); color = "w"; state = initialState(); ready = false; selected = null; mode = "friend"; isHost = true; movePending = false;
-  peer = new window.Peer(peerId(code));
+  peer = new Peer(peerId(code));
   peer.on("open", showGame);
   peer.on("connection", (incoming) => attachConnection(incoming, true));
   peer.on("error", (error) => {
@@ -241,7 +242,7 @@ function joinRoom(roomCode) {
   if (!ensurePeerLibrary()) return;
   destroyPeer();
   code = roomCode; color = "b"; state = initialState(); ready = false; selected = null; mode = "friend"; isHost = false; movePending = false;
-  peer = new window.Peer();
+  peer = new Peer();
   peer.on("open", () => {
     showGame();
     attachConnection(peer.connect(peerId(code), { reliable:true }), false);
