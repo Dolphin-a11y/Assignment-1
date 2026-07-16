@@ -44,7 +44,7 @@ const videos = [
 function stressInfo(level: number) {
   if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", color: "#2f7d63", game: "Focus Sprint" };
   if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#b86b37", game: "Hidden Object Room" };
-  return { key: "high", label: "Feeling overloaded", note: "No rush. Let the music hold your attention for a while.", color: "#6a5d9d", game: "Bemuse Rhythm Game" };
+  return { key: "high", label: "Feeling overloaded", note: "No rush. Turn a familiar song into a gentle focus game.", color: "#6a5d9d", game: "Your Song Rhythm" };
 }
 
 function shuffle(size = 9) {
@@ -276,6 +276,15 @@ function BemuseGame() {
   );
 }
 
+function CustomSongRhythmGame() {
+  return (
+    <div className="game-shell custom-rhythm-game">
+      <div className="game-top"><span>Upload a song and follow the falling notes</span><strong>Inspired by Rhythm Plus</strong></div>
+      <iframe className="custom-rhythm-frame" src="/rhythm-upload.html" title="Upload your own song rhythm game" allow="autoplay" />
+    </div>
+  );
+}
+
 function PuzzleGame() {
   const [tiles, setTiles] = useState(() => shuffle());
   const [selected, setSelected] = useState<number | null>(null);
@@ -370,8 +379,8 @@ export default function Home() {
       </section>
 
       <section className="game-section">
-        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "Choose a song and redirect your attention into Bemuse’s full keyboard rhythm experience."}</p></div>
-        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <BemuseGame />}
+        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "Choose a song you enjoy and turn it into a private four-lane rhythm challenge."}</p></div>
+        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <CustomSongRhythmGame />}
       </section>
 
       <section className="video-section">

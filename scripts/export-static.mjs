@@ -23,6 +23,7 @@ html = html.replace("</head>", '<link rel="stylesheet" href="/video-update.css?v
 html = html.replace("</head>", '<link rel="stylesheet" href="/nav-update.css?v=1"></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/rhythm.css?v=1"></head>');
 html = html.replace("</head>", '<link rel="stylesheet" href="/bemuse.css?v=1"></head>');
-html = html.replace("</body>", '<script src="/standalone.js?v=bemuse-v10" defer></script></body>');
+html = html.replace("</head>", '<link rel="stylesheet" href="/custom-rhythm-embed.css?v=1"></head>');
+html = html.replace("</body>", '<script src="/standalone.js?v=custom-song-rhythm-v11" defer></script></body>');
 await writeFile(new URL("../public/index.html", import.meta.url), html, "utf8");
 console.log("Exported public/index.html");

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Song Rhythm</title><link rel="stylesheet" href="./rhythm-upload.css?v=1"></head>
+<body>
+  <main class="rhythm-app">
+    <header><div><span>Score</span><strong id="score">000000</strong></div><div class="song-title"><span>Your Song Rhythm</span><strong id="song-name">Choose a local song</strong></div><div><span>Combo</span><strong id="combo">0</strong></div><button id="pause" type="button" disabled>Pause</button></header>
+    <section class="game-stage">
+      <canvas id="rhythm-canvas" aria-label="Four lane rhythm game"></canvas>
+      <div class="judgement" id="judgement" aria-live="polite">Ready</div>
+      <div class="upload-panel" id="upload-panel">
+        <div class="upload-icon">♫</div><h1>Play a song you love</h1><p>Select an audio file. It stays on this device and is never uploaded.</p>
+        <label class="file-button">Choose song<input id="song-file" type="file" accept="audio/*"></label>
+        <div class="game-options"><label>Difficulty<select id="difficulty"><option value="easy">Gentle</option><option value="normal" selected>Flow</option><option value="hard">Challenge</option></select></label><span id="file-status">MP3, WAV, M4A or OGG</span></div>
+        <button id="start-game" class="start-button" type="button" disabled>Start rhythm</button>
+      </div>
+    </section>
+    <footer><div class="key-guide"><span><b>D</b> Rain</span><span><b>F</b> Glow</span><span><b>J</b> Wave</span><span><b>K</b> Star</span></div><p>Tap lanes or use D F J K · Inspired by <a href="https://github.com/henryzt/Rhythm-Plus-Music-Game" target="_blank" rel="noreferrer">Rhythm Plus (GPL-3.0)</a></p></footer>
+    <audio id="song-audio" preload="metadata"></audio>
+  </main>
+  <script src="./rhythm-upload.js?v=1" defer></script>
+</body>
+</html>
