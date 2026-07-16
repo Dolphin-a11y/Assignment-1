@@ -1,12 +1,11 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Song Rhythm</title><link rel="stylesheet" href="./rhythm-upload.css?v=arcade-track-v3"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Song Rhythm</title><link rel="stylesheet" href="./rhythm-upload.css?v=clean-track-v4"></head>
 <body>
   <main class="rhythm-app">
     <header><div><span>Score</span><strong id="score">000000</strong></div><div class="song-title"><span>Your Song Rhythm</span><strong id="song-name">Choose a local song</strong></div><div><span>Combo</span><strong id="combo">0</strong></div><button id="pause" type="button" disabled>Pause</button></header>
     <section class="game-stage">
       <canvas id="rhythm-canvas" aria-label="Four lane rhythm game"></canvas>
-      <div class="arcade-hud"><div class="hp-meter"><b>HP</b><span><i id="health-fill"></i></span></div><div class="note-legend"><span>● Tap</span><span>▬ Hold</span><span>↔ Slide</span></div></div>
       <div class="judgement" id="judgement" aria-live="polite">Ready</div>
       <div class="upload-panel" id="upload-panel">
         <div class="upload-icon">♫</div><h1>Play a song you love</h1><p>Select an audio file. It stays on this device and is never uploaded.</p>
@@ -24,6 +23,6 @@
     </footer>
     <audio id="song-audio" preload="metadata"></audio>
   </main>
-  <script src="./rhythm-upload.js?v=arcade-modes-v5" defer></script>
+  <script src="./rhythm-upload.js?v=clean-track-v6" defer></script>
 </body>
 </html>

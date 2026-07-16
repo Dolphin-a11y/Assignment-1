@@ -12,7 +12,6 @@
   const songName = document.querySelector("#song-name");
   const fileStatus = document.querySelector("#file-status");
   const judgement = document.querySelector("#judgement");
-  const healthFill = document.querySelector("#health-fill");
   const colors = ["#4fc3f7", "#ff9acb", "#70d6a8", "#b89cff"];
   const defaultKeys = ["d", "f", "j", "k"];
   let keys = [...defaultKeys];
@@ -37,7 +36,6 @@
   let beatCandidates = [];
   let analysisToken = 0;
   let analysedDuration = 0;
-  let health = 100;
   let pendingSlide = null;
   const activeHolds = new Map();
   const laneFlashes = [0, 0, 0, 0];
@@ -217,14 +215,13 @@
         ctx.strokeStyle = colors[note.lane]; ctx.lineWidth = Math.max(5, bounds.width * .24); ctx.shadowBlur = 20; ctx.shadowColor = colors[note.lane];
         ctx.beginPath(); ctx.moveTo(x + (bounds.width * .84) / 2, Math.min(y, hitY)); ctx.lineTo(tailBounds.x + tailBounds.width / 2, Math.max(topY, Math.min(hitY, tailY))); ctx.stroke(); ctx.shadowBlur = 0;
       }
-      if (note.type === "slide") {
-        const target = laneBounds(note.targetLane, Math.max(topY, Math.min(hitY, y - 34)));
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.shadowBlur = 14; ctx.shadowColor = colors[note.lane]; ctx.beginPath(); ctx.moveTo(bounds.x + bounds.width / 2, y); ctx.lineTo(target.x + target.width / 2, y - 34); ctx.stroke(); ctx.shadowBlur = 0;
-      }
+      const noteWidth = note.type === "slide" ? bounds.width * .54 : bounds.width * .84;
+      const noteX = note.type === "slide" ? bounds.x + (bounds.width - noteWidth) / 2 : x;
       const gradient = ctx.createLinearGradient(x, y, x, y + noteHeight);
       gradient.addColorStop(0, "#fff"); gradient.addColorStop(.18, colors[note.lane]); gradient.addColorStop(1, `${colors[note.lane]}b8`);
-      ctx.fillStyle = gradient; ctx.shadowBlur = 22; ctx.shadowColor = colors[note.lane]; roundedRect(x, y, bounds.width * .84, noteHeight, 12); ctx.shadowBlur = 0;
-      ctx.fillStyle = "#fff"; ctx.font = "900 15px Segoe UI"; ctx.textAlign = "center"; ctx.fillText(note.type === "hold" ? "▬" : note.type === "slide" ? "↔" : "▼", x + bounds.width * .42, y + noteHeight * .7);
+      ctx.fillStyle = gradient; ctx.shadowBlur = 22; ctx.shadowColor = colors[note.lane]; roundedRect(noteX, y, noteWidth, noteHeight, note.type === "slide" ? 18 : 12); ctx.shadowBlur = 0;
+      const slideMark = note.targetLane > note.lane ? "›" : "‹";
+      ctx.fillStyle = "#fff"; ctx.font = "900 17px Segoe UI"; ctx.textAlign = "center"; ctx.fillText(note.type === "hold" ? "▬" : note.type === "slide" ? slideMark : "▼", noteX + noteWidth / 2, y + noteHeight * .7);
     }
 
     particles = particles.filter((particle) => particle.life > 0);
@@ -233,17 +230,16 @@
     if (playing || !audio.paused) animation = requestAnimationFrame(draw);
   }
 
-  function updateStats() { scoreLabel.textContent = String(score).padStart(6, "0"); comboLabel.textContent = combo; healthFill.style.width = `${health}%`; }
+  function updateStats() { scoreLabel.textContent = String(score).padStart(6, "0"); comboLabel.textContent = combo; }
   function showJudgement(text, color) { judgement.textContent = text; judgement.style.color = color; judgement.classList.remove("show"); void judgement.offsetWidth; judgement.classList.add("show"); }
 
   function registerMiss(label) {
     combo = 0;
-    health = Math.max(0, health - (label === "Missing" ? 8 : 4));
     updateStats(); showJudgement(label, "#ff6b9e");
   }
 
   function completeHit(note, lane, distance, forcedLabel = "") {
-    note.hit = true; note.started = true; combo += 1; maxCombo = Math.max(maxCombo, combo); health = Math.min(100, health + 2);
+    note.hit = true; note.started = true; combo += 1; maxCombo = Math.max(maxCombo, combo);
     let points = 400; let label = forcedLabel || "Good";
     if (!forcedLabel && distance <= .075) { points = 1000; label = "Perfect"; } else if (!forcedLabel && distance <= .15) { points = 700; label = "Great"; }
     if (forcedLabel) points = 900;
@@ -286,7 +282,7 @@
   }
 
   function startGame() {
-    createChart(); score = 0; combo = 0; maxCombo = 0; health = 100; pendingSlide = null; activeHolds.clear(); laneFlashes.fill(0); updateStats(); audio.currentTime = 0; panel.classList.add("hidden"); pauseButton.disabled = false; pauseButton.textContent = "Pause";
+    createChart(); score = 0; combo = 0; maxCombo = 0; pendingSlide = null; activeHolds.clear(); laneFlashes.fill(0); updateStats(); audio.currentTime = 0; panel.classList.add("hidden"); pauseButton.disabled = false; pauseButton.textContent = "Pause";
     audio.play().then(() => { playing = true; cancelAnimationFrame(animation); draw(); }).catch(() => { panel.classList.remove("hidden"); fileStatus.textContent = "Press Start again to allow audio"; });
   }
 
