@@ -279,8 +279,8 @@ function BemuseGame() {
 function CustomSongRhythmGame() {
   return (
     <div className="game-shell custom-rhythm-game">
-        <div className="game-top"><span>Upload a song — every falling bar follows its beat</span><strong>Beat-synced locally</strong></div>
-        <iframe className="custom-rhythm-frame" src="/rhythm-upload.html?v=beat-sync-v3" title="Upload your own song rhythm game" allow="autoplay" />
+        <div className="game-top"><span>Upload a song — every falling bar follows its beat</span><strong>Custom keys available</strong></div>
+        <iframe className="custom-rhythm-frame" src="/rhythm-upload.html?v=custom-keys-v4" title="Upload your own song rhythm game" allow="autoplay" />
     </div>
   );
 }

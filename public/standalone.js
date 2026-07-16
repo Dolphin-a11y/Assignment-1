@@ -256,7 +256,7 @@
   }
 
   function renderCustomSongRhythm() {
-    gameShell().outerHTML = `<div class="game-shell custom-rhythm-game"><div class="game-top"><span>Upload a song — every falling bar follows its beat</span><strong>Beat-synced locally</strong></div><iframe class="custom-rhythm-frame" src="./rhythm-upload.html?v=beat-sync-v3" title="Upload your own song rhythm game" allow="autoplay"></iframe></div>`;
+    gameShell().outerHTML = `<div class="game-shell custom-rhythm-game"><div class="game-top"><span>Upload a song — every falling bar follows its beat</span><strong>Custom keys available</strong></div><iframe class="custom-rhythm-frame" src="./rhythm-upload.html?v=custom-keys-v4" title="Upload your own song rhythm game" allow="autoplay"></iframe></div>`;
   }
 
   function renderExperience(force = false) {

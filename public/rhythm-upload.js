@@ -13,7 +13,16 @@
   const fileStatus = document.querySelector("#file-status");
   const judgement = document.querySelector("#judgement");
   const colors = ["#4fc3f7", "#ff9acb", "#70d6a8", "#b89cff"];
-  const keys = ["d", "f", "j", "k"];
+  const defaultKeys = ["d", "f", "j", "k"];
+  let keys = [...defaultKeys];
+  try {
+    const savedKeys = JSON.parse(localStorage.getItem("drift-rhythm-keys"));
+    if (Array.isArray(savedKeys) && savedKeys.length === 4 && savedKeys.every((key) => /^[a-z0-9]$/.test(key))) keys = savedKeys;
+  } catch {}
+  const keyButtons = [...document.querySelectorAll(".key-bind")];
+  const keyStatus = document.querySelector("#key-status");
+  const resetKeys = document.querySelector("#reset-keys");
+  let remappingLane = null;
   const travelTime = 1.8;
   let fileUrl = null;
   let notes = [];
@@ -33,6 +42,15 @@
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(rect.width * ratio); canvas.height = Math.round(rect.height * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
+
+  function updateKeyLabels() {
+    keyButtons.forEach((button, lane) => { button.textContent = keys[lane].toUpperCase(); });
+  }
+
+  function saveKeys() {
+    localStorage.setItem("drift-rhythm-keys", JSON.stringify(keys));
+    updateKeyLabels();
   }
 
   function random() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
@@ -213,7 +231,32 @@
   startButton.addEventListener("click", startGame);
   pauseButton.addEventListener("click", () => { if (audio.paused) { audio.play(); playing = true; pauseButton.textContent = "Pause"; draw(); } else { audio.pause(); playing = false; pauseButton.textContent = "Continue"; } });
   audio.addEventListener("ended", finishGame);
-  window.addEventListener("keydown", (event) => { const lane = keys.indexOf(event.key.toLowerCase()); if (lane >= 0) { event.preventDefault(); hitLane(lane); } });
+  keyButtons.forEach((button, lane) => button.addEventListener("click", () => {
+    remappingLane = lane;
+    keyButtons.forEach((item) => item.classList.remove("listening"));
+    button.classList.add("listening");
+    keyStatus.textContent = `Press a letter or number for lane ${lane + 1}.`;
+  }));
+  resetKeys.addEventListener("click", () => {
+    keys = [...defaultKeys]; remappingLane = null; saveKeys();
+    keyButtons.forEach((button) => button.classList.remove("listening"));
+    keyStatus.textContent = "Keys reset to D F J K.";
+  });
+  window.addEventListener("keydown", (event) => {
+    const pressed = event.key.toLowerCase();
+    if (remappingLane !== null) {
+      event.preventDefault();
+      if (!/^[a-z0-9]$/.test(pressed)) { keyStatus.textContent = "Please press one letter or number."; return; }
+      const duplicateLane = keys.indexOf(pressed);
+      if (duplicateLane >= 0 && duplicateLane !== remappingLane) keys[duplicateLane] = keys[remappingLane];
+      keys[remappingLane] = pressed;
+      remappingLane = null; saveKeys();
+      keyButtons.forEach((button) => button.classList.remove("listening"));
+      keyStatus.textContent = `Saved: ${keys.map((key) => key.toUpperCase()).join(" · ")}`;
+      return;
+    }
+    const lane = keys.indexOf(pressed); if (lane >= 0) { event.preventDefault(); hitLane(lane); }
+  });
   canvas.addEventListener("pointerdown", (event) => { const rect = canvas.getBoundingClientRect(); hitLane(Math.max(0, Math.min(3, Math.floor((event.clientX - rect.left) / (rect.width / 4))))); });
-  window.addEventListener("resize", resize); resize(); draw();
+  window.addEventListener("resize", resize); updateKeyLabels(); resize(); draw();
 })();

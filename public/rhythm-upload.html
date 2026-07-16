@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Song Rhythm</title><link rel="stylesheet" href="./rhythm-upload.css?v=1"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your Song Rhythm</title><link rel="stylesheet" href="./rhythm-upload.css?v=key-settings-v2"></head>
 <body>
   <main class="rhythm-app">
     <header><div><span>Score</span><strong id="score">000000</strong></div><div class="song-title"><span>Your Song Rhythm</span><strong id="song-name">Choose a local song</strong></div><div><span>Combo</span><strong id="combo">0</strong></div><button id="pause" type="button" disabled>Pause</button></header>
@@ -14,9 +14,15 @@
         <button id="start-game" class="start-button" type="button" disabled>Start rhythm</button>
       </div>
     </section>
-    <footer><div class="key-guide"><span><b>D</b> Rain</span><span><b>F</b> Glow</span><span><b>J</b> Wave</span><span><b>K</b> Star</span></div><p>Tap lanes or use D F J K · Inspired by <a href="https://github.com/henryzt/Rhythm-Plus-Music-Game" target="_blank" rel="noreferrer">Rhythm Plus (GPL-3.0)</a></p></footer>
+    <footer>
+      <div class="controls-wrap">
+        <div class="key-guide"><span><button class="key-bind" data-lane="0" type="button">D</button> Rain</span><span><button class="key-bind" data-lane="1" type="button">F</button> Glow</span><span><button class="key-bind" data-lane="2" type="button">J</button> Wave</span><span><button class="key-bind" data-lane="3" type="button">K</button> Star</span></div>
+        <details class="key-settings"><summary>Change keys</summary><div class="key-settings-panel"><strong>Custom key controls</strong><p id="key-status">Choose a lane key, then press a new letter or number.</p><button id="reset-keys" type="button">Reset to D F J K</button></div></details>
+      </div>
+      <p>Tap lanes or use your chosen keys · Inspired by <a href="https://github.com/henryzt/Rhythm-Plus-Music-Game" target="_blank" rel="noreferrer">Rhythm Plus (GPL-3.0)</a></p>
+    </footer>
     <audio id="song-audio" preload="metadata"></audio>
   </main>
-  <script src="./rhythm-upload.js?v=beat-sync-v3" defer></script>
+  <script src="./rhythm-upload.js?v=custom-keys-v4" defer></script>
 </body>
 </html>
