@@ -252,7 +252,7 @@
   }
 
   function renderCustomSongRhythm() {
-    gameShell().outerHTML = `<div class="game-shell custom-rhythm-game"><div class="game-top"><span>Play clean neon notes with the uploaded song</span><strong>Long hold notes</strong></div><iframe class="custom-rhythm-frame" src="./rhythm-upload.html?v=long-hold-v10" title="Upload your own song rhythm game" allow="autoplay"></iframe></div>`;
+    gameShell().outerHTML = `<div class="game-shell custom-rhythm-game"><div class="game-top"><span>Notes follow the uploaded song’s rhythm and tempo</span><strong>Automatic BPM sync</strong></div><iframe class="custom-rhythm-frame" src="./rhythm-upload.html?v=tempo-sync-v11" title="Upload your own song rhythm game" allow="autoplay"></iframe></div>`;
   }
 
   function renderExperience(force = false) {

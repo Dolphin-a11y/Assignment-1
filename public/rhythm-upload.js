@@ -23,7 +23,8 @@
   const keyStatus = document.querySelector("#key-status");
   const resetKeys = document.querySelector("#reset-keys");
   let remappingLane = null;
-  const travelTime = 1.8;
+  let travelTime = 1.8;
+  let detectedBpm = 0;
   let fileUrl = null;
   let notes = [];
   let particles = [];
@@ -104,11 +105,27 @@
         });
       }
       if (beatCandidates.length < 8) throw new Error("Not enough musical peaks were detected. Try another song.");
+      const tempoBins = new Map();
+      for (let index = 1; index < beatCandidates.length; index++) {
+        let gap = beatCandidates[index].time - beatCandidates[index - 1].time;
+        if (gap < .18 || gap > 1.5) continue;
+        while (gap > .78) gap /= 2;
+        while (gap < .32) gap *= 2;
+        const bin = Math.round(gap / .02) * .02;
+        tempoBins.set(bin, (tempoBins.get(bin) || 0) + beatCandidates[index].strength);
+      }
+      let beatInterval = .5;
+      let strongestTempo = -1;
+      for (const [interval, strength] of tempoBins) {
+        if (strength > strongestTempo) { strongestTempo = strength; beatInterval = interval; }
+      }
+      detectedBpm = Math.round(60 / beatInterval);
+      travelTime = Math.max(1.15, Math.min(2.45, beatInterval * 4));
       analysedDuration = buffer.duration;
       const minutes = Math.floor(buffer.duration / 60);
       const seconds = Math.floor(buffer.duration % 60).toString().padStart(2, "0");
       createChart();
-      fileStatus.textContent = `${file.name} · ${minutes}:${seconds} · ${notes.length} synced notes`;
+      fileStatus.textContent = `${file.name} · ${minutes}:${seconds} · ${detectedBpm} BPM · ${notes.length} synced notes`;
       startButton.disabled = false;
       startButton.textContent = "Start beat-synced rhythm";
       panel.querySelector("h1").textContent = "Song ready";
@@ -227,9 +244,10 @@
       }
       const noteWidth = note.type === "slide" ? bounds.width * .54 : bounds.width * .84;
       const noteX = note.type === "slide" ? bounds.x + (bounds.width - noteWidth) / 2 : x;
-      const gradient = ctx.createLinearGradient(x, y, x, y + noteHeight);
+      const noteY = y - noteHeight / 2;
+      const gradient = ctx.createLinearGradient(x, noteY, x, noteY + noteHeight);
       gradient.addColorStop(0, "#fff"); gradient.addColorStop(.18, colors[note.lane]); gradient.addColorStop(1, `${colors[note.lane]}b8`);
-      ctx.fillStyle = gradient; ctx.shadowBlur = 22; ctx.shadowColor = colors[note.lane]; roundedRect(noteX, y, noteWidth, noteHeight, note.type === "slide" ? 18 : 12); ctx.shadowBlur = 0;
+      ctx.fillStyle = gradient; ctx.shadowBlur = 22; ctx.shadowColor = colors[note.lane]; roundedRect(noteX, noteY, noteWidth, noteHeight, note.type === "slide" ? 18 : 12); ctx.shadowBlur = 0;
     }
 
     particles = particles.filter((particle) => particle.life > 0);
@@ -305,6 +323,7 @@
     const token = ++analysisToken;
     beatCandidates = [];
     analysedDuration = 0;
+    detectedBpm = 0;
     songName.textContent = file.name; fileStatus.textContent = "Analysing beats and energy…"; startButton.disabled = true;
     panel.querySelector("h1").textContent = "Listening for the beat";
     panel.querySelector("p").textContent = "This local analysis may take a moment for a long song.";
@@ -319,7 +338,7 @@
   difficulty.addEventListener("change", () => {
     if (!beatCandidates.length || !analysedDuration) return;
     createChart();
-    fileStatus.textContent = `${fileInput.files[0].name} · ${notes.length} synced notes ready`;
+    fileStatus.textContent = `${fileInput.files[0].name} · ${detectedBpm} BPM · ${notes.length} synced notes ready`;
   });
   startButton.addEventListener("click", startGame);
   pauseButton.addEventListener("click", () => { if (audio.paused) { audio.play(); playing = true; pauseButton.textContent = "Pause"; draw(); } else { audio.pause(); playing = false; pauseButton.textContent = "Continue"; } });
