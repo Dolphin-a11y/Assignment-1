@@ -26,6 +26,7 @@
   let seed = 1;
   let beatCandidates = [];
   let analysisToken = 0;
+  let analysedDuration = 0;
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -82,12 +83,15 @@
         });
       }
       if (beatCandidates.length < 8) throw new Error("Not enough musical peaks were detected. Try another song.");
+      analysedDuration = buffer.duration;
       const minutes = Math.floor(buffer.duration / 60);
       const seconds = Math.floor(buffer.duration % 60).toString().padStart(2, "0");
-      fileStatus.textContent = `${file.name} · ${minutes}:${seconds} · ${beatCandidates.length} beats found`;
+      createChart();
+      fileStatus.textContent = `${file.name} · ${minutes}:${seconds} · ${notes.length} synced notes`;
       startButton.disabled = false;
+      startButton.textContent = "Start beat-synced rhythm";
       panel.querySelector("h1").textContent = "Song ready";
-      panel.querySelector("p").textContent = "The notes now follow the song’s detected beats and energy peaks.";
+      panel.querySelector("p").textContent = "Each falling bar reaches the white line when its detected beat plays.";
     } finally {
       await audioContext.close();
     }
@@ -104,8 +108,8 @@
     for (const beat of beatCandidates) {
       if (beat.strength < threshold || beat.time - previousTime < minimumGaps[difficulty.value]) continue;
       const lane = Math.abs(Math.floor(beat.brightness * 10000 + random() * 4)) % 4;
-      notes.push({ time: beat.time, lane, hit: false, missed: false });
-      if (difficulty.value === "hard" && beat.strength > threshold * 2.15) notes.push({ time: beat.time, lane: (lane + 2) % 4, hit: false, missed: false });
+      notes.push({ time: beat.time, lane, strength: beat.strength, hit: false, missed: false });
+      if (difficulty.value === "hard" && beat.strength > threshold * 2.15) notes.push({ time: beat.time, lane: (lane + 2) % 4, strength: beat.strength, hit: false, missed: false });
       previousTime = beat.time;
     }
   }
@@ -134,15 +138,17 @@
     }
     ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 18; ctx.shadowColor = "#ffffff"; ctx.fillRect(0, hitY, width, 4); ctx.shadowBlur = 0;
 
+    const strongestNote = notes.reduce((maximum, item) => Math.max(maximum, item.strength || 0), 0) || 1;
     for (const note of notes) {
       if (note.hit || note.missed) continue;
       if (current - note.time > 0.24) { note.missed = true; combo = 0; updateStats(); showJudgement("Miss", "#ff91b5"); continue; }
       const y = hitY - ((note.time - current) / travelTime) * (hitY - topY);
       if (y < -45 || y > height + 30) continue;
       const x = note.lane * laneWidth + 9;
-      const gradient = ctx.createLinearGradient(x, y, x, y + 32);
+      const noteHeight = 28 + Math.min((note.strength || 0) / strongestNote, 1) * 12;
+      const gradient = ctx.createLinearGradient(x, y, x, y + noteHeight);
       gradient.addColorStop(0, "#fff"); gradient.addColorStop(.18, colors[note.lane]); gradient.addColorStop(1, `${colors[note.lane]}b8`);
-      ctx.fillStyle = gradient; ctx.shadowBlur = 18; ctx.shadowColor = colors[note.lane]; roundedRect(x, y, laneWidth - 18, 31, 12); ctx.shadowBlur = 0;
+      ctx.fillStyle = gradient; ctx.shadowBlur = 18; ctx.shadowColor = colors[note.lane]; roundedRect(x, y, laneWidth - 18, noteHeight, 12); ctx.shadowBlur = 0;
     }
 
     particles = particles.filter((particle) => particle.life > 0);
@@ -187,6 +193,7 @@
     if (fileUrl) URL.revokeObjectURL(fileUrl); fileUrl = URL.createObjectURL(file); audio.src = fileUrl;
     const token = ++analysisToken;
     beatCandidates = [];
+    analysedDuration = 0;
     songName.textContent = file.name; fileStatus.textContent = "Analysing beats and energy…"; startButton.disabled = true;
     panel.querySelector("h1").textContent = "Listening for the beat";
     panel.querySelector("p").textContent = "This local analysis may take a moment for a long song.";
@@ -197,6 +204,11 @@
       panel.querySelector("h1").textContent = "Try another song";
       panel.querySelector("p").textContent = "MP3, WAV and OGG files work best for beat detection.";
     }
+  });
+  difficulty.addEventListener("change", () => {
+    if (!beatCandidates.length || !analysedDuration) return;
+    createChart();
+    fileStatus.textContent = `${fileInput.files[0].name} · ${notes.length} synced notes ready`;
   });
   startButton.addEventListener("click", startGame);
   pauseButton.addEventListener("click", () => { if (audio.paused) { audio.play(); playing = true; pauseButton.textContent = "Pause"; draw(); } else { audio.pause(); playing = false; pauseButton.textContent = "Continue"; } });
