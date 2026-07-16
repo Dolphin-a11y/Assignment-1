@@ -256,7 +256,7 @@
   }
 
   function renderJigsaw3D() {
-    gameShell().outerHTML = `<div class="game-shell jigsaw-3d-game"><div class="game-top"><span>Choose the Drift image or upload your own</span><strong>3D jigsaw puzzle</strong></div><iframe class="jigsaw-frame" src="./jigsaw-3d.html?v=1" title="Upload an image and play a 3D jigsaw puzzle"></iframe></div>`;
+    gameShell().outerHTML = `<div class="game-shell jigsaw-3d-game"><div class="game-top"><span>Choose the ocean image or upload your own</span><strong>3D jigsaw puzzle</strong></div><iframe class="jigsaw-frame" src="./jigsaw-3d.html?v=2" title="Upload an image and play a 3D jigsaw puzzle"></iframe></div>`;
   }
 
   function renderExperience(force = false) {

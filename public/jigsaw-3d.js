@@ -9,7 +9,9 @@
   const placedLabel = document.querySelector("#placed");
   const completion = document.querySelector("#completion");
   const presetCard = document.querySelector("#preset-card");
-  let source = "./og.png";
+  const referenceView = document.querySelector("#reference-view");
+  const referenceImage = document.querySelector("#reference-image");
+  let source = "./ocean-jigsaw.png";
   let normalisedSource = "";
   let pieces = [];
   let moves = 0;
@@ -50,7 +52,9 @@
     const canvas = document.createElement("canvas");
     canvas.width = 960; canvas.height = 600;
     const context = canvas.getContext("2d");
-    const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+    context.fillStyle = "#dbeaf2";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    const scale = Math.min(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
     const width = image.naturalWidth * scale; const height = image.naturalHeight * scale;
     context.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
     return canvas.toDataURL("image/jpeg", .9);
@@ -129,7 +133,7 @@
   async function createPuzzle() {
     completion.hidden = true; window.clearInterval(timerId); startedAt = 0; moves = 0; placed = 0; topLayer = 20;
     if (!normalisedSource) normalisedSource = await normalise(source);
-    board.replaceChildren(); board.style.backgroundImage = `url("${normalisedSource}")`;
+    board.replaceChildren();
     const [rows, columns] = difficulty.value.split("x").map(Number);
     const width = board.clientWidth; const height = board.clientHeight;
     const cellWidth = width / columns; const cellHeight = height / rows; const padding = Math.min(cellWidth, cellHeight) * .19;
@@ -153,10 +157,14 @@
 
   upload.addEventListener("change", async () => {
     const file = upload.files[0]; if (!file) return;
-    if (uploadUrl) URL.revokeObjectURL(uploadUrl); uploadUrl = URL.createObjectURL(file); source = uploadUrl; normalisedSource = ""; presetCard.classList.remove("selected");
+    if (uploadUrl) URL.revokeObjectURL(uploadUrl); uploadUrl = URL.createObjectURL(file); source = uploadUrl; referenceImage.src = uploadUrl; normalisedSource = ""; presetCard.classList.remove("selected");
     await createPuzzle();
   });
-  document.querySelector("#use-preset").addEventListener("click", async () => { source = "./og.png"; normalisedSource = ""; presetCard.classList.add("selected"); await createPuzzle(); });
+  document.querySelector("#use-preset").addEventListener("click", async () => { source = "./ocean-jigsaw.png"; referenceImage.src = source; normalisedSource = ""; presetCard.classList.add("selected"); await createPuzzle(); });
+  document.querySelector("#show-reference").addEventListener("click", () => { referenceView.hidden = false; document.querySelector("#close-reference").focus(); });
+  document.querySelector("#close-reference").addEventListener("click", () => { referenceView.hidden = true; document.querySelector("#show-reference").focus(); });
+  referenceView.addEventListener("click", (event) => { if (event.target === referenceView) referenceView.hidden = true; });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !referenceView.hidden) referenceView.hidden = true; });
   document.querySelector("#new-puzzle").addEventListener("click", createPuzzle);
   document.querySelector("#play-again").addEventListener("click", createPuzzle);
   difficulty.addEventListener("change", createPuzzle);

@@ -1,0 +1,75 @@
+.reference-button {
+  padding: 0 18px;
+  border: 1px solid #4c67593d;
+  border-radius: 14px;
+  color: #365f4c;
+  background: #fff;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.puzzle-board {
+  background: #14241f !important;
+  background-image: none !important;
+}
+
+.puzzle-board::before {
+  display: none;
+}
+
+.reference-view {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #0a1711d9;
+  backdrop-filter: blur(10px);
+}
+
+.reference-view[hidden] {
+  display: none;
+}
+
+.reference-card {
+  position: relative;
+  width: min(820px, 92vw);
+  max-height: 90%;
+  padding: 14px;
+  border-radius: 22px;
+  background: #f7f2e9;
+  box-shadow: 0 35px 90px #020704;
+}
+
+.reference-card img {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 13px;
+}
+
+.reference-close {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  color: white;
+  background: #203c31;
+  box-shadow: 0 6px 18px #0005;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .reference-button,
+  .shuffle-button {
+    min-height: 44px;
+  }
+}

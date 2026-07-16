@@ -276,8 +276,8 @@ function CustomSongRhythmGame() {
 function Jigsaw3DGame() {
   return (
     <div className="game-shell jigsaw-3d-game">
-      <div className="game-top"><span>Choose the Drift image or upload your own</span><strong>3D jigsaw puzzle</strong></div>
-      <iframe className="jigsaw-frame" src="/jigsaw-3d.html?v=1" title="Upload an image and play a 3D jigsaw puzzle" />
+      <div className="game-top"><span>Choose the ocean image or upload your own</span><strong>3D jigsaw puzzle</strong></div>
+      <iframe className="jigsaw-frame" src="/jigsaw-3d.html?v=2" title="Upload an image and play a 3D jigsaw puzzle" />
     </div>
   );
 }

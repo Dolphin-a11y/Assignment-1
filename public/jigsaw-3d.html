@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Drift 3D Jigsaw</title>
   <link rel="stylesheet" href="./jigsaw-3d.css?v=1">
+  <link rel="stylesheet" href="./jigsaw-reference.css?v=2">
 </head>
 <body>
   <main class="jigsaw-app">
@@ -14,9 +15,10 @@
     </header>
 
     <section class="puzzle-controls" aria-label="Puzzle settings">
-      <div class="preset-card selected" id="preset-card"><img src="./og.png" alt="Built-in Drift image"><span>Drift image</span><button id="use-preset" type="button">Use image</button></div>
+      <div class="preset-card selected" id="preset-card"><img src="./ocean-jigsaw.png" alt="Blue ocean beneath a clear sky"><span>Ocean image</span><button id="use-preset" type="button">Use image</button></div>
       <label class="upload-card"><span class="upload-mark">+</span><strong>Upload your image</strong><small>JPG, PNG or WebP · stays on this device</small><input id="image-upload" type="file" accept="image/jpeg,image/png,image/webp"></label>
       <label class="difficulty">Pieces<select id="difficulty"><option value="2x3">6 · Gentle</option><option value="3x4" selected>12 · Flow</option><option value="4x5">20 · Challenge</option></select></label>
+      <button class="reference-button" id="show-reference" type="button">Show full image</button>
       <button class="shuffle-button" id="new-puzzle" type="button">Shuffle puzzle</button>
     </section>
 
@@ -26,11 +28,14 @@
         <div class="puzzle-board" id="puzzle-board" aria-label="Draggable 3D jigsaw puzzle"></div>
       </div>
       <div class="completion" id="completion" hidden><strong>Puzzle complete!</strong><span>You brought every piece gently into place.</span><button type="button" id="play-again">Play again</button></div>
+      <div class="reference-view" id="reference-view" role="dialog" aria-modal="true" aria-label="Full puzzle image" hidden>
+        <div class="reference-card"><button class="reference-close" id="close-reference" type="button" aria-label="Close full image">×</button><img id="reference-image" src="./ocean-jigsaw.png" alt="The complete puzzle reference"></div>
+      </div>
     </section>
 
     <footer><span>Drag each piece close to its matching place to snap it in.</span><a href="https://github.com/jfmdev/jqJigsawPuzzle" target="_blank" rel="noreferrer">Piece topology adapted from jqJigsawPuzzle · MPL-2.0</a></footer>
   </main>
   <script src="./vendor/jqJigsawPuzzle/jqJigsawPuzzle-adapted.js"></script>
-  <script src="./jigsaw-3d.js?v=1"></script>
+  <script src="./jigsaw-3d.js?v=2"></script>
 </body>
 </html>
