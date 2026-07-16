@@ -1,0 +1,67 @@
+.mode-choice {
+  max-width: 900px;
+  margin: 46px auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.mode-card {
+  min-height: 280px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid #27382f22;
+  border-radius: 28px;
+  color: #26372f;
+  background: #faf8f3;
+  box-shadow: 0 24px 70px #27382f14;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .18s, box-shadow .18s;
+}
+
+.mode-card:hover { transform: translateY(-4px); box-shadow: 0 30px 75px #27382f25; }
+.mode-card .mode-icon { min-height: 73px; font-family: "Segoe UI Symbol", serif; font-size: 53px; }
+.mode-card strong { margin-top: auto; font: 400 29px Georgia, serif; }
+.mode-card small { min-height: 48px; margin: 8px 0 19px; color: #6d7d74; font-size: 12px; line-height: 1.55; }
+.mode-card b { padding: 10px 15px; border-radius: 99px; color: white; background: #2f4c3e; font-size: 11px; }
+.mode-card.dark-mode { color: white; background: #293b33; }
+.mode-card.dark-mode small { color: #c3cec8; }
+.mode-card.dark-mode b { color: #273a31; background: #dfe8e2; }
+
+.ai-choice {
+  position: relative;
+  max-width: 760px;
+  margin: 46px auto;
+  padding: 34px;
+  border: 1px solid #27382f22;
+  border-radius: 28px;
+  background: #faf8f3;
+  box-shadow: 0 24px 70px #27382f14;
+  text-align: center;
+}
+
+.section-kicker,.game-mode-label { color: #9eb0a6; font-size: 9px; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+.ai-choice h2 { margin: 8px 0; font: 400 31px Georgia, serif; }
+.ai-choice p { margin: 0 auto 25px; color: #6e7e75; font-size: 12px; }
+.colour-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.colour-actions button { min-height: 105px; border: 1px solid #283a3230; border-radius: 18px; color: #273a31; background: #edf1ed; font-weight: 750; cursor: pointer; }
+.colour-actions button:last-child { color: white; background: #293b33; }
+.colour-actions span { display: block; font-family: "Segoe UI Symbol", serif; font-size: 45px; }
+.back-button { margin-top: 20px; border: 0; color: #5e7167; background: transparent; cursor: pointer; }
+.friend-back { grid-column: 1 / -1; justify-self: center; }
+
+.game-mode-label { margin-bottom: 12px; }
+.ai-opponent { margin-bottom: 16px; padding: 14px; display: flex; align-items: center; gap: 12px; border-radius: 15px; background: #ffffff10; }
+.ai-opponent > span { font-size: 38px; }
+.ai-opponent small { display: block; color: #b7c4bd; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+.ai-opponent strong { font-size: 14px; }
+
+@media (max-width: 700px) {
+  .mode-choice { margin: 22px auto; grid-template-columns: 1fr; }
+  .mode-card { min-height: 210px; padding: 22px; }
+  .mode-card .mode-icon { min-height: 54px; font-size: 42px; }
+  .ai-choice { margin: 22px auto; padding: 24px 18px; }
+}

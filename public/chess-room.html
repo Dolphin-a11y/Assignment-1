@@ -6,20 +6,35 @@
   <title>Drift Calm Chess</title>
   <link rel="stylesheet" href="./chess-room.css?v=1">
   <link rel="stylesheet" href="./chess-pieces.css?v=1">
+  <link rel="stylesheet" href="./chess-modes.css?v=1">
 </head>
 <body>
   <main class="chess-app">
-    <header><div><span>Calm activity</span><h1>A quiet game together</h1></div><p>Take turns. Notice the board. There is no need to rush.</p></header>
+    <header><div><span>Calm activity</span><h1>A quiet game your way</h1></div><p>Choose a gentle AI match or invite a friend. There is no need to rush.</p></header>
 
-    <section class="lobby" id="lobby">
+    <section class="mode-choice" id="mode-choice">
+      <button class="mode-card" id="choose-ai" type="button"><span class="mode-icon">♞</span><strong>Play with AI</strong><small>Start immediately against a calm computer opponent.</small><b>Choose AI game</b></button>
+      <button class="mode-card dark-mode" id="choose-friend" type="button"><span class="mode-icon">♙ ♟</span><strong>Play with a friend</strong><small>Create a room code or join a friend’s room.</small><b>Choose friend game</b></button>
+    </section>
+
+    <section class="ai-choice" id="ai-choice" hidden>
+      <div><span class="section-kicker">Play with AI</span><h2>Which colour would you like?</h2><p>White moves first. Choose Black if you would like the AI to begin.</p></div>
+      <div class="colour-actions"><button id="ai-white" type="button"><span>♙</span>Play White</button><button id="ai-black" type="button"><span>♟</span>Play Black</button></div>
+      <button class="back-button" data-back type="button">← Back</button>
+    </section>
+
+    <section class="lobby" id="friend-lobby" hidden>
       <div class="lobby-card create-card"><div class="piece-set white-set" aria-label="White king, queen, rook, bishop, knight and pawn">♔ ♕ ♖ ♗ ♘ ♙</div><div><strong>Start a room</strong><p>You play White with the full set: king, queen, rooks, bishops, knights and pawns.</p></div><button id="create-room" type="button">Create room</button></div>
       <div class="or"><span>or</span></div>
       <form class="lobby-card join-card" id="join-form"><div class="piece-set black-set" aria-label="Black king, queen, rook, bishop, knight and pawn">♚ ♛ ♜ ♝ ♞ ♟</div><div><strong>Join a friend</strong><p>You play Black with the same complete set of standard chess pieces.</p></div><label>Room code<input id="room-code-input" maxlength="6" autocomplete="off" spellcheck="false" placeholder="ABC234" required></label><button type="submit">Join room</button></form>
+      <button class="back-button friend-back" data-back type="button">← Back to game options</button>
     </section>
 
     <section class="game" id="game" hidden>
       <aside class="room-panel">
-        <div class="room-label">Room code</div><div class="room-code"><strong id="room-code">------</strong><button id="copy-code" type="button">Copy</button></div>
+        <div class="game-mode-label" id="game-mode-label">Friend game</div>
+        <div id="room-details"><div class="room-label">Room code</div><div class="room-code"><strong id="room-code">------</strong><button id="copy-code" type="button">Copy</button></div></div>
+        <div class="ai-opponent" id="ai-opponent" hidden><span>♞</span><div><small>Your opponent</small><strong>Calm AI</strong></div></div>
         <div class="identity"><span id="player-piece">♙</span><div><small>You are playing</small><strong id="player-color">White</strong></div></div>
         <div class="turn-card"><small>Current turn</small><strong id="turn-label">White</strong><span id="room-status">Waiting for a friend to join…</span></div>
         <button class="new-game" id="reset-game" type="button">Reset board</button>
@@ -34,6 +49,6 @@
     <div class="notice" id="notice" role="alert" hidden></div>
     <footer><span>Two players · synchronized room · touch or click to move</span><a href="https://github.com/niklasf/python-chess" target="_blank" rel="noreferrer">Rules behavior referenced from python-chess documentation</a></footer>
   </main>
-  <script type="module" src="./chess-room.js?v=2"></script>
+  <script type="module" src="./chess-room.js?v=3"></script>
 </body>
 </html>

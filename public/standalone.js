@@ -260,7 +260,7 @@
   }
 
   function renderCalmChess() {
-    gameShell().outerHTML = `<div class="game-shell calm-chess-game"><div class="game-top"><span>Create a room or join with a friend’s code</span><strong>Two-player online chess</strong></div><iframe class="chess-frame" src="./chess-room.html?v=2" title="Two-player chess room"></iframe></div>`;
+    gameShell().outerHTML = `<div class="game-shell calm-chess-game"><div class="game-top"><span>Play with AI or create a room for a friend</span><strong>Calm chess your way</strong></div><iframe class="chess-frame" src="./chess-room.html?v=3" title="AI and two-player chess"></iframe></div>`;
   }
 
   function renderExperience(force = false) {
