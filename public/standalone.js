@@ -34,7 +34,7 @@
 
   function stressInfo(level) {
     if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", game: "Focus Sprint", copy: "A playful burst to channel your energy into one simple target." };
-    if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", game: "Hidden Object Room", copy: "Let busy thoughts soften while you search a cosy room for one tiny object." };
+    if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", game: "Your 3D Jigsaw", copy: "Slow down with a tactile 3D puzzle made from a Drift image or one of your own." };
     return { key: "high", label: "Feeling overloaded", note: "No rush. Turn a familiar song into a gentle focus game.", game: "Your Song Rhythm", copy: "Choose a song you enjoy and turn it into a private four-lane rhythm challenge." };
   }
 
@@ -255,6 +255,10 @@
     gameShell().outerHTML = `<div class="game-shell custom-rhythm-game"><div class="game-top"><span>Play notes with computer keys — not the mouse</span><strong>Keyboard-only gameplay</strong></div><iframe class="custom-rhythm-frame" src="./rhythm-upload.html?v=keyboard-only-v13" title="Upload your own song rhythm game" allow="autoplay"></iframe></div>`;
   }
 
+  function renderJigsaw3D() {
+    gameShell().outerHTML = `<div class="game-shell jigsaw-3d-game"><div class="game-top"><span>Choose the Drift image or upload your own</span><strong>3D jigsaw puzzle</strong></div><iframe class="jigsaw-frame" src="./jigsaw-3d.html?v=1" title="Upload an image and play a 3D jigsaw puzzle"></iframe></div>`;
+  }
+
   function renderExperience(force = false) {
     const info = stressInfo(stress);
     app.className = `app theme-${info.key}`;
@@ -267,7 +271,7 @@
     if (!force && currentMode === info.key) return;
     currentMode = info.key;
     if (info.key === "low") renderFocus();
-    else if (info.key === "moderate") renderFind();
+    else if (info.key === "moderate") renderJigsaw3D();
     else renderCustomSongRhythm();
     if (soundOn) restartSound();
   }

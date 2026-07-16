@@ -1,0 +1,11 @@
+jqJigsawPuzzle topology adapter
+
+The piece-topology algorithm in jqJigsawPuzzle-adapted.js is derived from
+jqJigsawPuzzle by JFMDev (Copyright 2012 JFMDev).
+
+Original project: https://github.com/jfmdev/jqJigsawPuzzle
+License: Mozilla Public License 2.0
+License text: https://mozilla.org/MPL/2.0/
+
+The modern drag system, responsive 3D presentation, upload workflow, snapping,
+timer, completion tracking, and all other Drift puzzle code are original work.
