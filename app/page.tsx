@@ -264,23 +264,11 @@ function RhythmGame() {
   );
 }
 
-function BemuseGame() {
-  return (
-    <div className="game-shell bemuse-game">
-      <div className="game-top"><span>Open-source browser rhythm game</span><strong>Powered by Bemuse</strong></div>
-      <div className="bemuse-frame-wrap">
-        <iframe src="https://bemuse.ninja/" title="Bemuse rhythm game" allow="autoplay; fullscreen; gamepad" allowFullScreen />
-      </div>
-      <div className="bemuse-actions"><div><strong>Bemuse — beat☆music☆sequence</strong><span>Best experienced in Google Chrome. Select a song, then follow the falling notes with your keyboard.</span></div><div><a href="https://bemuse.ninja/" target="_blank" rel="noreferrer">Open full screen ↗</a><a className="bemuse-source" href="https://github.com/bemusic/bemuse" target="_blank" rel="noreferrer">Source · AGPL-3.0</a></div></div>
-    </div>
-  );
-}
-
 function CustomSongRhythmGame() {
   return (
     <div className="game-shell custom-rhythm-game">
-        <div className="game-top"><span>Upload a song — every falling bar follows its beat</span><strong>Custom keys available</strong></div>
-        <iframe className="custom-rhythm-frame" src="/rhythm-upload.html?v=custom-keys-v4" title="Upload your own song rhythm game" allow="autoplay" />
+        <div className="game-top"><span>Tap, hold and slide with the uploaded song</span><strong>Neon rhythm track</strong></div>
+        <iframe className="custom-rhythm-frame" src="/rhythm-upload.html?v=arcade-modes-v5" title="Upload your own song rhythm game" allow="autoplay" />
     </div>
   );
 }

@@ -12,6 +12,7 @@
   const songName = document.querySelector("#song-name");
   const fileStatus = document.querySelector("#file-status");
   const judgement = document.querySelector("#judgement");
+  const healthFill = document.querySelector("#health-fill");
   const colors = ["#4fc3f7", "#ff9acb", "#70d6a8", "#b89cff"];
   const defaultKeys = ["d", "f", "j", "k"];
   let keys = [...defaultKeys];
@@ -36,6 +37,10 @@
   let beatCandidates = [];
   let analysisToken = 0;
   let analysedDuration = 0;
+  let health = 100;
+  let pendingSlide = null;
+  const activeHolds = new Map();
+  const laneFlashes = [0, 0, 0, 0];
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -109,7 +114,7 @@
       startButton.disabled = false;
       startButton.textContent = "Start beat-synced rhythm";
       panel.querySelector("h1").textContent = "Song ready";
-      panel.querySelector("p").textContent = "Each falling bar reaches the white line when its detected beat plays.";
+      panel.querySelector("p").textContent = "Tap short notes, hold long beams, and follow slide arrows in time with the song.";
     } finally {
       await audioContext.close();
     }
@@ -122,13 +127,25 @@
     const threshold = strengths[Math.floor(strengths.length * percentiles[difficulty.value])] || 0;
     seed = hash(`${fileInput.files[0]?.name || "song"}-${difficulty.value}`);
     notes = [];
+    const selectedBeats = [];
     let previousTime = -10;
     for (const beat of beatCandidates) {
       if (beat.strength < threshold || beat.time - previousTime < minimumGaps[difficulty.value]) continue;
-      const lane = Math.abs(Math.floor(beat.brightness * 10000 + random() * 4)) % 4;
-      notes.push({ time: beat.time, lane, strength: beat.strength, hit: false, missed: false });
-      if (difficulty.value === "hard" && beat.strength > threshold * 2.15) notes.push({ time: beat.time, lane: (lane + 2) % 4, strength: beat.strength, hit: false, missed: false });
+      selectedBeats.push(beat);
       previousTime = beat.time;
+    }
+    for (let index = 0; index < selectedBeats.length; index++) {
+      const beat = selectedBeats[index];
+      const lane = Math.abs(Math.floor(beat.brightness * 10000 + random() * 4)) % 4;
+      const nextGap = (selectedBeats[index + 1]?.time || beat.time + 2) - beat.time;
+      const typeRoll = random();
+      let type = "tap";
+      let duration = 0;
+      let targetLane = lane;
+      if (typeRoll > .87 && nextGap > .48) { type = "hold"; duration = Math.min(Math.max(nextGap * .82, .46), 1.25); }
+      else if (typeRoll > .72 && index < selectedBeats.length - 1) { type = "slide"; targetLane = (lane + 1 + Math.floor(random() * 3)) % 4; }
+      notes.push({ time: beat.time, lane, targetLane, type, duration, strength: beat.strength, hit: false, missed: false, started: false });
+      if (difficulty.value === "hard" && type === "tap" && beat.strength > threshold * 2.15) notes.push({ time: beat.time, lane: (lane + 2) % 4, targetLane: (lane + 2) % 4, type: "tap", duration: 0, strength: beat.strength, hit: false, missed: false, started: false });
     }
   }
 
@@ -139,34 +156,75 @@
   function draw() {
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-    const laneWidth = width / 4;
-    const hitY = height - 78;
-    const topY = 20;
+    const hitY = height - 68;
+    const topY = 38;
     const current = audio.currentTime || 0;
-    const background = ctx.createLinearGradient(0, 0, 0, height);
-    background.addColorStop(0, "#5c377f"); background.addColorStop(.55, "#39295f"); background.addColorStop(1, "#161429");
+    const leftTop = width * .36;
+    const rightTop = width * .64;
+    const leftBottom = width * .045;
+    const rightBottom = width * .955;
+    const laneBounds = (lane, y) => {
+      const progress = Math.max(0, Math.min(1, (y - topY) / (hitY - topY)));
+      const left = leftTop + (leftBottom - leftTop) * progress;
+      const right = rightTop + (rightBottom - rightTop) * progress;
+      const laneWidth = (right - left) / 4;
+      return { x: left + lane * laneWidth, width: laneWidth };
+    };
+
+    const background = ctx.createRadialGradient(width / 2, topY, 10, width / 2, height / 2, width * .8);
+    background.addColorStop(0, "#244b70"); background.addColorStop(.38, "#121830"); background.addColorStop(1, "#070713");
     ctx.fillStyle = background; ctx.fillRect(0, 0, width, height);
+    const leftBurst = ctx.createLinearGradient(0, 0, leftBottom, height);
+    leftBurst.addColorStop(0, "#ffb24a14"); leftBurst.addColorStop(.55, "#ff5c283f"); leftBurst.addColorStop(1, "#ff44b326");
+    ctx.fillStyle = leftBurst; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(leftTop, topY); ctx.lineTo(leftBottom, hitY); ctx.lineTo(0, height); ctx.fill();
+    const rightBurst = ctx.createLinearGradient(width, 0, rightBottom, height);
+    rightBurst.addColorStop(0, "#8f6bff12"); rightBurst.addColorStop(.55, "#ff3ccf38"); rightBurst.addColorStop(1, "#36cfff28");
+    ctx.fillStyle = rightBurst; ctx.beginPath(); ctx.moveTo(width, 0); ctx.lineTo(rightTop, topY); ctx.lineTo(rightBottom, hitY); ctx.lineTo(width, height); ctx.fill();
+    for (let star = 0; star < 55; star++) {
+      const x = (star * 97 + 31) % Math.max(width, 1); const y = (star * 61 + 17) % Math.max(hitY, 1);
+      ctx.globalAlpha = .22 + (star % 4) * .16; ctx.fillStyle = star % 3 ? "#fff" : "#68e5ff"; ctx.fillRect(x, y, star % 5 === 0 ? 2 : 1, star % 5 === 0 ? 2 : 1);
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#060812dc"; ctx.beginPath(); ctx.moveTo(leftTop, topY); ctx.lineTo(rightTop, topY); ctx.lineTo(rightBottom, hitY); ctx.lineTo(leftBottom, hitY); ctx.closePath(); ctx.fill();
 
     for (let lane = 0; lane < 4; lane++) {
-      const laneGradient = ctx.createLinearGradient(0, 0, 0, height);
-      laneGradient.addColorStop(0, `${colors[lane]}18`); laneGradient.addColorStop(1, `${colors[lane]}42`);
-      ctx.fillStyle = laneGradient; ctx.fillRect(lane * laneWidth + 2, 0, laneWidth - 4, height);
-      ctx.strokeStyle = "#ffffff20"; ctx.lineWidth = 1; ctx.strokeRect(lane * laneWidth, 0, laneWidth, height);
-      ctx.fillStyle = "#ffffffd8"; ctx.font = "700 14px Segoe UI"; ctx.textAlign = "center"; ctx.fillText(keys[lane].toUpperCase(), lane * laneWidth + laneWidth / 2, hitY + 43);
+      const top = laneBounds(lane, topY); const bottom = laneBounds(lane, hitY);
+      const laneGradient = ctx.createLinearGradient(0, topY, 0, hitY);
+      laneGradient.addColorStop(0, `${colors[lane]}0c`); laneGradient.addColorStop(1, `${colors[lane]}38`);
+      ctx.fillStyle = laneGradient; ctx.beginPath(); ctx.moveTo(top.x + 1, topY); ctx.lineTo(top.x + top.width - 1, topY); ctx.lineTo(bottom.x + bottom.width - 3, hitY); ctx.lineTo(bottom.x + 3, hitY); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = "#bcecff32"; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(top.x, topY); ctx.lineTo(bottom.x, hitY); ctx.stroke();
+      const flashing = laneFlashes[lane] > Date.now();
+      ctx.fillStyle = flashing ? "#ffffff" : "#101527"; ctx.shadowBlur = flashing ? 42 : 18; ctx.shadowColor = colors[lane]; roundedRect(bottom.x + 6, hitY + 9, bottom.width - 12, 38, 18); ctx.shadowBlur = 0;
+      ctx.strokeStyle = colors[lane]; ctx.lineWidth = flashing ? 4 : 2; ctx.strokeRect(bottom.x + 12, hitY + 15, bottom.width - 24, 26);
+      ctx.fillStyle = flashing ? colors[lane] : "#e9fbff"; ctx.font = "900 15px Segoe UI"; ctx.textAlign = "center"; ctx.fillText(keys[lane].toUpperCase(), bottom.x + bottom.width / 2, hitY + 35);
     }
-    ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 18; ctx.shadowColor = "#ffffff"; ctx.fillRect(0, hitY, width, 4); ctx.shadowBlur = 0;
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 5; ctx.shadowBlur = 22; ctx.shadowColor = "#63ddff"; ctx.beginPath(); ctx.moveTo(leftBottom, hitY); ctx.lineTo(rightBottom, hitY); ctx.stroke(); ctx.shadowBlur = 0;
 
     const strongestNote = notes.reduce((maximum, item) => Math.max(maximum, item.strength || 0), 0) || 1;
     for (const note of notes) {
       if (note.hit || note.missed) continue;
-      if (current - note.time > 0.24) { note.missed = true; combo = 0; updateStats(); showJudgement("Miss", "#ff91b5"); continue; }
+      if (note.type === "hold" && note.started && current >= note.time + note.duration) { activeHolds.delete(note.lane); completeHit(note, note.lane, 0, "Hold!"); continue; }
+      if (note.started && note.type === "slide" && current - note.time > .55) { note.missed = true; pendingSlide = null; registerMiss("Missing"); continue; }
+      if (!note.started && current - note.time > 0.24) { note.missed = true; registerMiss("Missing"); continue; }
       const y = hitY - ((note.time - current) / travelTime) * (hitY - topY);
       if (y < -45 || y > height + 30) continue;
-      const x = note.lane * laneWidth + 9;
+      const bounds = laneBounds(note.lane, Math.max(topY, Math.min(hitY, y)));
+      const x = bounds.x + Math.max(5, bounds.width * .08);
       const noteHeight = 28 + Math.min((note.strength || 0) / strongestNote, 1) * 12;
+      if (note.type === "hold") {
+        const tailY = hitY - (((note.time + note.duration) - current) / travelTime) * (hitY - topY);
+        const tailBounds = laneBounds(note.lane, Math.max(topY, Math.min(hitY, tailY)));
+        ctx.strokeStyle = colors[note.lane]; ctx.lineWidth = Math.max(5, bounds.width * .24); ctx.shadowBlur = 20; ctx.shadowColor = colors[note.lane];
+        ctx.beginPath(); ctx.moveTo(x + (bounds.width * .84) / 2, Math.min(y, hitY)); ctx.lineTo(tailBounds.x + tailBounds.width / 2, Math.max(topY, Math.min(hitY, tailY))); ctx.stroke(); ctx.shadowBlur = 0;
+      }
+      if (note.type === "slide") {
+        const target = laneBounds(note.targetLane, Math.max(topY, Math.min(hitY, y - 34)));
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.shadowBlur = 14; ctx.shadowColor = colors[note.lane]; ctx.beginPath(); ctx.moveTo(bounds.x + bounds.width / 2, y); ctx.lineTo(target.x + target.width / 2, y - 34); ctx.stroke(); ctx.shadowBlur = 0;
+      }
       const gradient = ctx.createLinearGradient(x, y, x, y + noteHeight);
       gradient.addColorStop(0, "#fff"); gradient.addColorStop(.18, colors[note.lane]); gradient.addColorStop(1, `${colors[note.lane]}b8`);
-      ctx.fillStyle = gradient; ctx.shadowBlur = 18; ctx.shadowColor = colors[note.lane]; roundedRect(x, y, laneWidth - 18, noteHeight, 12); ctx.shadowBlur = 0;
+      ctx.fillStyle = gradient; ctx.shadowBlur = 22; ctx.shadowColor = colors[note.lane]; roundedRect(x, y, bounds.width * .84, noteHeight, 12); ctx.shadowBlur = 0;
+      ctx.fillStyle = "#fff"; ctx.font = "900 15px Segoe UI"; ctx.textAlign = "center"; ctx.fillText(note.type === "hold" ? "▬" : note.type === "slide" ? "↔" : "▼", x + bounds.width * .42, y + noteHeight * .7);
     }
 
     particles = particles.filter((particle) => particle.life > 0);
@@ -175,29 +233,60 @@
     if (playing || !audio.paused) animation = requestAnimationFrame(draw);
   }
 
-  function updateStats() { scoreLabel.textContent = String(score).padStart(6, "0"); comboLabel.textContent = combo; }
+  function updateStats() { scoreLabel.textContent = String(score).padStart(6, "0"); comboLabel.textContent = combo; healthFill.style.width = `${health}%`; }
   function showJudgement(text, color) { judgement.textContent = text; judgement.style.color = color; judgement.classList.remove("show"); void judgement.offsetWidth; judgement.classList.add("show"); }
+
+  function registerMiss(label) {
+    combo = 0;
+    health = Math.max(0, health - (label === "Missing" ? 8 : 4));
+    updateStats(); showJudgement(label, "#ff6b9e");
+  }
+
+  function completeHit(note, lane, distance, forcedLabel = "") {
+    note.hit = true; note.started = true; combo += 1; maxCombo = Math.max(maxCombo, combo); health = Math.min(100, health + 2);
+    let points = 400; let label = forcedLabel || "Good";
+    if (!forcedLabel && distance <= .075) { points = 1000; label = "Perfect"; } else if (!forcedLabel && distance <= .15) { points = 700; label = "Great"; }
+    if (forcedLabel) points = 900;
+    score += Math.round(points * (1 + Math.min(combo, 50) / 100)); laneFlashes[lane] = Date.now() + 180; updateStats(); showJudgement(label, colors[lane]);
+    const trackLeft = canvas.clientWidth * .045; const trackWidth = canvas.clientWidth * .91; const laneWidth = trackWidth / 4;
+    for (let index = 0; index < 9; index++) particles.push({ x: trackLeft + lane * laneWidth + laneWidth / 2 + (Math.random() - .5) * 75, y: canvas.clientHeight - 72, life: 1, color: colors[lane] });
+  }
 
   function hitLane(lane) {
     if (!playing || audio.paused) return;
     const current = audio.currentTime;
+    laneFlashes[lane] = Date.now() + 100;
+    if (pendingSlide && !pendingSlide.hit && !pendingSlide.missed) {
+      if (lane === pendingSlide.targetLane && current - pendingSlide.time <= .55) {
+        const slide = pendingSlide; pendingSlide = null; completeHit(slide, lane, slide.initialDistance || 0, "Slide!");
+      } else if (lane !== pendingSlide.lane) registerMiss("Offbeat");
+      return;
+    }
     let candidate = null; let distance = Infinity;
     for (const note of notes) {
-      if (note.lane !== lane || note.hit || note.missed) continue;
+      if (note.lane !== lane || note.hit || note.missed || note.started) continue;
       const diff = Math.abs(note.time - current);
       if (diff < distance) { distance = diff; candidate = note; }
     }
-    if (!candidate || distance > .25) { combo = 0; updateStats(); showJudgement("Miss", "#ff91b5"); return; }
-    candidate.hit = true; combo += 1; maxCombo = Math.max(maxCombo, combo);
-    let points = 400; let label = "Good";
-    if (distance <= .075) { points = 1000; label = "Perfect"; } else if (distance <= .15) { points = 700; label = "Great"; }
-    score += Math.round(points * (1 + Math.min(combo, 50) / 100)); updateStats(); showJudgement(label, colors[lane]);
-    const laneWidth = canvas.clientWidth / 4;
-    for (let index = 0; index < 5; index++) particles.push({ x: lane * laneWidth + laneWidth / 2 + (Math.random() - .5) * 55, y: canvas.clientHeight - 85, life: 1, color: colors[lane] });
+    if (!candidate || distance > .25) { registerMiss("Offbeat"); return; }
+    if (candidate.type === "hold") {
+      candidate.started = true; candidate.initialDistance = distance; activeHolds.set(lane, candidate); showJudgement("Hold", colors[lane]); return;
+    }
+    if (candidate.type === "slide") {
+      candidate.started = true; candidate.initialDistance = distance; pendingSlide = candidate; showJudgement(`Slide → ${keys[candidate.targetLane].toUpperCase()}`, colors[lane]); return;
+    }
+    completeHit(candidate, lane, distance);
+  }
+
+  function releaseLane(lane) {
+    const note = activeHolds.get(lane); if (!note) return;
+    activeHolds.delete(lane);
+    if (audio.currentTime >= note.time + note.duration - .12) completeHit(note, lane, note.initialDistance || 0, "Hold!");
+    else { note.missed = true; registerMiss("Offbeat"); }
   }
 
   function startGame() {
-    createChart(); score = 0; combo = 0; maxCombo = 0; updateStats(); audio.currentTime = 0; panel.classList.add("hidden"); pauseButton.disabled = false; pauseButton.textContent = "Pause";
+    createChart(); score = 0; combo = 0; maxCombo = 0; health = 100; pendingSlide = null; activeHolds.clear(); laneFlashes.fill(0); updateStats(); audio.currentTime = 0; panel.classList.add("hidden"); pauseButton.disabled = false; pauseButton.textContent = "Pause";
     audio.play().then(() => { playing = true; cancelAnimationFrame(animation); draw(); }).catch(() => { panel.classList.remove("hidden"); fileStatus.textContent = "Press Start again to allow audio"; });
   }
 
@@ -255,8 +344,13 @@
       keyStatus.textContent = `Saved: ${keys.map((key) => key.toUpperCase()).join(" · ")}`;
       return;
     }
-    const lane = keys.indexOf(pressed); if (lane >= 0) { event.preventDefault(); hitLane(lane); }
+    const lane = keys.indexOf(pressed); if (lane >= 0) { event.preventDefault(); if (!event.repeat) hitLane(lane); }
   });
-  canvas.addEventListener("pointerdown", (event) => { const rect = canvas.getBoundingClientRect(); hitLane(Math.max(0, Math.min(3, Math.floor((event.clientX - rect.left) / (rect.width / 4))))); });
+  window.addEventListener("keyup", (event) => { const lane = keys.indexOf(event.key.toLowerCase()); if (lane >= 0) releaseLane(lane); });
+  let pointerLane = null;
+  function laneFromPointer(event) { const rect = canvas.getBoundingClientRect(); const left = rect.width * .045; const trackWidth = rect.width * .91; return Math.max(0, Math.min(3, Math.floor(((event.clientX - rect.left) - left) / (trackWidth / 4)))); }
+  canvas.addEventListener("pointerdown", (event) => { pointerLane = laneFromPointer(event); canvas.setPointerCapture?.(event.pointerId); hitLane(pointerLane); });
+  canvas.addEventListener("pointermove", (event) => { if (pointerLane === null || !event.buttons) return; const nextLane = laneFromPointer(event); if (nextLane !== pointerLane) { pointerLane = nextLane; hitLane(nextLane); } });
+  canvas.addEventListener("pointerup", () => { if (pointerLane !== null) releaseLane(pointerLane); pointerLane = null; });
   window.addEventListener("resize", resize); updateKeyLabels(); resize(); draw();
 })();
