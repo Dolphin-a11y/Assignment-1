@@ -275,7 +275,7 @@ export default function Home() {
   return (
     <main className={`app theme-${info.key}`}>
       <div className="ambient ambient-one" /><div className="ambient ambient-two" />
-      <nav><a className="brand" href="#top" aria-label="Drift home"><span>◌</span> drift</a><div className="nav-actions"><a href="#progress">My journey</a><button className={soundOn ? "sound active" : "sound"} onClick={toggleSound} aria-pressed={soundOn}><span>{soundOn ? "◖))" : "◖"}</span>{soundOn ? "Sound on" : "Sound off"}</button></div></nav>
+      <nav><a className="brand" href="#top" aria-label="Drift home"><span>◌</span> drift</a><div className="nav-actions"><a className="progress-link" href="/progress.html">Progress</a><button className={soundOn ? "sound active" : "sound"} onClick={toggleSound} aria-pressed={soundOn}><span>{soundOn ? "◖))" : "◖"}</span>{soundOn ? "Sound on" : "Sound off"}</button></div></nav>
 
       <section id="top" className="hero">
         <div className="eyebrow">A tiny pause, just for you</div>

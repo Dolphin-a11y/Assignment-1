@@ -11,6 +11,9 @@
   const gameCopy = gameSection.querySelector(".section-intro > p");
   const gameShell = () => gameSection.querySelector(".game-shell");
 
+  const progressLink = document.querySelector('.nav-actions a[href="#progress"]');
+  if (progressLink) { progressLink.textContent = "Progress"; progressLink.href = "./progress.html"; progressLink.classList.add("progress-link"); }
+
   const removedVideo = document.querySelector('iframe[src*="xNN7iTA57jM"]')?.closest(".video-card");
   if (removedVideo) removedVideo.remove();
   document.querySelector(".video-grid")?.classList.add("two-videos");

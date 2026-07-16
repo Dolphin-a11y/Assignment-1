@@ -1,0 +1,2 @@
+.nav-actions .progress-link{display:inline-flex;padding:10px 17px;border:1px solid var(--line);border-radius:99px;background:#ffffff7a;font-weight:650;transition:background .2s,color .2s}.nav-actions .progress-link:hover{color:#fff;background:var(--accent)}
+@media(max-width:760px){.nav-actions{gap:8px}.nav-actions .progress-link{display:inline-flex;padding:8px 12px;font-size:12px}}
