@@ -209,19 +209,13 @@
       const bounds = laneBounds(note.lane, Math.max(topY, Math.min(hitY, y)));
       const x = bounds.x + Math.max(5, bounds.width * .08);
       const noteHeight = 28 + Math.min((note.strength || 0) / strongestNote, 1) * 12;
-      if (note.type === "hold") {
-        const tailY = hitY - (((note.time + note.duration) - current) / travelTime) * (hitY - topY);
-        const tailBounds = laneBounds(note.lane, Math.max(topY, Math.min(hitY, tailY)));
-        ctx.strokeStyle = colors[note.lane]; ctx.lineWidth = Math.max(5, bounds.width * .24); ctx.shadowBlur = 20; ctx.shadowColor = colors[note.lane];
-        ctx.beginPath(); ctx.moveTo(x + (bounds.width * .84) / 2, Math.min(y, hitY)); ctx.lineTo(tailBounds.x + tailBounds.width / 2, Math.max(topY, Math.min(hitY, tailY))); ctx.stroke(); ctx.shadowBlur = 0;
-      }
       const noteWidth = note.type === "slide" ? bounds.width * .54 : bounds.width * .84;
       const noteX = note.type === "slide" ? bounds.x + (bounds.width - noteWidth) / 2 : x;
       const gradient = ctx.createLinearGradient(x, y, x, y + noteHeight);
       gradient.addColorStop(0, "#fff"); gradient.addColorStop(.18, colors[note.lane]); gradient.addColorStop(1, `${colors[note.lane]}b8`);
       ctx.fillStyle = gradient; ctx.shadowBlur = 22; ctx.shadowColor = colors[note.lane]; roundedRect(noteX, y, noteWidth, noteHeight, note.type === "slide" ? 18 : 12); ctx.shadowBlur = 0;
       const slideMark = note.targetLane > note.lane ? "›" : "‹";
-      ctx.fillStyle = "#fff"; ctx.font = "900 17px Segoe UI"; ctx.textAlign = "center"; ctx.fillText(note.type === "hold" ? "▬" : note.type === "slide" ? slideMark : "▼", noteX + noteWidth / 2, y + noteHeight * .7);
+      ctx.fillStyle = "#fff"; ctx.font = note.type === "hold" ? "900 10px Segoe UI" : "900 17px Segoe UI"; ctx.textAlign = "center"; ctx.fillText(note.type === "hold" ? "HOLD" : note.type === "slide" ? slideMark : "▼", noteX + noteWidth / 2, y + noteHeight * .7);
     }
 
     particles = particles.filter((particle) => particle.life > 0);
