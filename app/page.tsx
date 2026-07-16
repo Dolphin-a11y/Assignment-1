@@ -6,7 +6,7 @@ type CheckIn = { id: number; level: number; label: string; time: string };
 
 type AudioNodeLike = { connect: (destination: unknown) => AudioNodeLike; dispose: () => void };
 type GainNodeLike = AudioNodeLike & { toDestination: () => GainNodeLike };
-type SynthLike = AudioNodeLike & { triggerAttackRelease: (note: string, duration: string, time: number, velocity: number) => void };
+type SynthLike = AudioNodeLike & { triggerAttackRelease: (note: string, duration: string, time: number | undefined, velocity: number) => void };
 type LoopLike = { start: (time: number) => LoopLike; dispose: () => void };
 type ToneRuntime = {
   start: () => Promise<void>;
@@ -44,7 +44,7 @@ const videos = [
 function stressInfo(level: number) {
   if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", color: "#2f7d63", game: "Focus Sprint" };
   if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#b86b37", game: "Hidden Object Room" };
-  return { key: "high", label: "Feeling overloaded", note: "No rush. Let your breathing become slow and steady.", color: "#6a5d9d", game: "Guided Breathing" };
+  return { key: "high", label: "Feeling overloaded", note: "No rush. Follow one gentle beat at a time.", color: "#6a5d9d", game: "Gentle Rhythm" };
 }
 
 function shuffle(size = 9) {
@@ -193,6 +193,77 @@ function BreathingGame() {
   );
 }
 
+function RhythmGame() {
+  const pads = [
+    { note: "C4", label: "Rain", symbol: "●" },
+    { note: "E4", label: "Glow", symbol: "◆" },
+    { note: "G4", label: "Wave", symbol: "≈" },
+    { note: "C5", label: "Star", symbol: "✦" },
+  ];
+  const [sequence, setSequence] = useState([0, 2, 1]);
+  const [input, setInput] = useState<number[]>([]);
+  const [playing, setPlaying] = useState(false);
+  const [active, setActive] = useState<number | null>(null);
+  const [round, setRound] = useState(1);
+  const [message, setMessage] = useState("Listen, then echo the pattern");
+  const rhythmAudio = useRef<{ synth: SynthLike; gain: GainNodeLike } | null>(null);
+
+  useEffect(() => () => { rhythmAudio.current?.synth.dispose(); rhythmAudio.current?.gain.dispose(); }, []);
+
+  async function soundPad(index: number) {
+    const Tone = await waitForTone();
+    if (!Tone) return;
+    await Tone.start();
+    if (!rhythmAudio.current) {
+      const gain = new Tone.Gain(0.2).toDestination();
+      const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "triangle" }, envelope: { attack: 0.03, release: 0.7 } }).connect(gain);
+      rhythmAudio.current = { synth, gain };
+    }
+    rhythmAudio.current.synth.triggerAttackRelease(pads[index].note, "8n", undefined, 0.65);
+  }
+
+  async function playPattern(pattern = sequence) {
+    if (playing) return;
+    setPlaying(true); setInput([]); setMessage("Listen closely…");
+    for (const pad of pattern) {
+      setActive(pad); void soundPad(pad);
+      await new Promise((resolve) => window.setTimeout(resolve, 460));
+      setActive(null);
+      await new Promise((resolve) => window.setTimeout(resolve, 150));
+    }
+    setPlaying(false); setMessage("Your turn — repeat the rhythm");
+  }
+
+  function choosePad(index: number) {
+    if (playing) return;
+    setActive(index); void soundPad(index); window.setTimeout(() => setActive(null), 220);
+    const nextInput = [...input, index];
+    if (sequence[nextInput.length - 1] !== index) {
+      setInput([]); setMessage("Almost — listen once more");
+      window.setTimeout(() => void playPattern(sequence), 750);
+      return;
+    }
+    if (nextInput.length === sequence.length) {
+      const nextSequence = [...sequence, (sequence.length * 3 + round) % pads.length];
+      setInput([]); setSequence(nextSequence); setRound((value) => value + 1); setMessage("Beautiful timing! Adding one beat…");
+      window.setTimeout(() => void playPattern(nextSequence), 850);
+      return;
+    }
+    setInput(nextInput); setMessage(`${nextInput.length} of ${sequence.length} beats matched`);
+  }
+
+  return (
+    <div className="game-shell rhythm-game">
+      <div className="game-top"><span>Listen and repeat the gentle pattern</span><strong>Round {round}</strong></div>
+      <div className="rhythm-field">
+        <div className="rhythm-status" aria-live="polite"><strong>{message}</strong><span>{sequence.length} beat pattern</span></div>
+        <div className="rhythm-pads">{pads.map((pad, index) => <button type="button" key={pad.label} className={`rhythm-pad pad-${index}${active === index ? " active" : ""}`} onClick={() => choosePad(index)} disabled={playing} aria-label={`${pad.label} tone`}><b>{pad.symbol}</b><span>{pad.label}</span></button>)}</div>
+        <button type="button" className="rhythm-play" onClick={() => void playPattern()} disabled={playing}>{playing ? "Playing pattern…" : input.length ? "Hear pattern again" : "Play the rhythm"}</button>
+      </div>
+    </div>
+  );
+}
+
 function PuzzleGame() {
   const [tiles, setTiles] = useState(() => shuffle());
   const [selected, setSelected] = useState<number | null>(null);
@@ -287,8 +358,8 @@ export default function Home() {
       </section>
 
       <section className="game-section">
-        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "A longer exhale can help your body ease out of its alert state. Go gently."}</p></div>
-        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <BreathingGame />}
+        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "A playful burst to channel your energy into one simple target." : info.key === "moderate" ? "Let busy thoughts soften while you search a cosy room for one tiny object." : "Let one soft musical pattern hold your attention, then echo it back at your own pace."}</p></div>
+        {info.key === "low" ? <FocusGame /> : info.key === "moderate" ? <FindGame /> : <RhythmGame />}
       </section>
 
       <section className="video-section">

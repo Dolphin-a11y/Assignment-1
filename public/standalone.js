@@ -35,7 +35,7 @@
   function stressInfo(level) {
     if (level <= 3) return { key: "low", label: "Light & steady", note: "You have room for a little energising focus.", game: "Focus Sprint", copy: "A playful burst to channel your energy into one simple target." };
     if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", game: "Hidden Object Room", copy: "Let busy thoughts soften while you search a cosy room for one tiny object." };
-    return { key: "high", label: "Feeling overloaded", note: "No rush. Let your breathing become slow and steady.", game: "Guided Breathing", copy: "A longer exhale can help your body ease out of its alert state. Go gently." };
+    return { key: "high", label: "Feeling overloaded", note: "No rush. Follow one gentle beat at a time.", game: "Gentle Rhythm", copy: "Let one soft musical pattern hold your attention, then echo it back at your own pace." };
   }
 
   function shuffle(size = 9) {
@@ -182,6 +182,75 @@
     field.querySelector(".breath-reset").addEventListener("click", () => { stopTimer(); running = false; phaseIndex = 0; seconds = phases[0].duration; cycles = 0; drawBreath(); });
   }
 
+  function renderRhythm() {
+    const pads = [
+      { note: "C4", label: "Rain", symbol: "●" },
+      { note: "E4", label: "Glow", symbol: "◆" },
+      { note: "G4", label: "Wave", symbol: "≈" },
+      { note: "C5", label: "Star", symbol: "✦" },
+    ];
+    let sequence = [0, 2, 1];
+    let input = [];
+    let playing = false;
+    let round = 1;
+    let rhythmSynth = null;
+    let rhythmGain = null;
+    gameShell().outerHTML = `<div class="game-shell rhythm-game"><div class="game-top"><span>Listen and repeat the gentle pattern</span><strong class="rhythm-round">Round 1</strong></div><div class="rhythm-field"><div class="rhythm-status" aria-live="polite"><strong>Listen, then echo the pattern</strong><span>3 beat pattern</span></div><div class="rhythm-pads">${pads.map((pad, index) => `<button type="button" class="rhythm-pad pad-${index}" data-pad="${index}" aria-label="${pad.label} tone"><b>${pad.symbol}</b><span>${pad.label}</span></button>`).join("")}</div><button type="button" class="rhythm-play">Play the rhythm</button></div></div>`;
+    const field = gameSection.querySelector(".rhythm-field");
+    const status = field.querySelector(".rhythm-status strong");
+    const lengthLabel = field.querySelector(".rhythm-status span");
+    const roundLabel = gameSection.querySelector(".rhythm-round");
+    const playButton = field.querySelector(".rhythm-play");
+    const padButtons = [...field.querySelectorAll(".rhythm-pad")];
+
+    async function soundPad(index) {
+      const Tone = await waitForTone();
+      if (!Tone) return;
+      await Tone.start();
+      if (!rhythmSynth) {
+        rhythmGain = new Tone.Gain(0.2).toDestination();
+        rhythmSynth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "triangle" }, envelope: { attack: 0.03, release: 0.7 } }).connect(rhythmGain);
+      }
+      rhythmSynth.triggerAttackRelease(pads[index].note, "8n", undefined, 0.65);
+    }
+
+    function flash(index, duration = 260) {
+      padButtons[index].classList.add("active");
+      window.setTimeout(() => padButtons[index]?.classList.remove("active"), duration);
+    }
+
+    async function playPattern(pattern = sequence) {
+      if (playing || !field.isConnected) return;
+      playing = true; input = []; status.textContent = "Listen closely…"; playButton.textContent = "Playing pattern…";
+      padButtons.forEach((button) => { button.disabled = true; });
+      for (const pad of pattern) {
+        flash(pad, 440); void soundPad(pad);
+        await new Promise((resolve) => window.setTimeout(resolve, 610));
+      }
+      playing = false; status.textContent = "Your turn — repeat the rhythm"; playButton.textContent = "Hear pattern again";
+      padButtons.forEach((button) => { button.disabled = false; });
+    }
+
+    function choosePad(index) {
+      if (playing) return;
+      flash(index); void soundPad(index);
+      const nextInput = [...input, index];
+      if (sequence[nextInput.length - 1] !== index) {
+        input = []; status.textContent = "Almost — listen once more";
+        window.setTimeout(() => void playPattern(sequence), 750); return;
+      }
+      if (nextInput.length === sequence.length) {
+        sequence = [...sequence, (sequence.length * 3 + round) % pads.length];
+        input = []; round += 1; roundLabel.textContent = `Round ${round}`; lengthLabel.textContent = `${sequence.length} beat pattern`; status.textContent = "Beautiful timing! Adding one beat…";
+        window.setTimeout(() => void playPattern(sequence), 850); return;
+      }
+      input = nextInput; status.textContent = `${input.length} of ${sequence.length} beats matched`;
+    }
+
+    padButtons.forEach((button) => button.addEventListener("click", () => choosePad(Number(button.dataset.pad))));
+    playButton.addEventListener("click", () => void playPattern());
+  }
+
   function renderExperience(force = false) {
     const info = stressInfo(stress);
     app.className = `app theme-${info.key}`;
@@ -195,7 +264,7 @@
     currentMode = info.key;
     if (info.key === "low") renderFocus();
     else if (info.key === "moderate") renderFind();
-    else renderBreathing();
+    else renderRhythm();
     if (soundOn) restartSound();
   }
 
