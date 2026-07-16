@@ -214,8 +214,6 @@
       const gradient = ctx.createLinearGradient(x, y, x, y + noteHeight);
       gradient.addColorStop(0, "#fff"); gradient.addColorStop(.18, colors[note.lane]); gradient.addColorStop(1, `${colors[note.lane]}b8`);
       ctx.fillStyle = gradient; ctx.shadowBlur = 22; ctx.shadowColor = colors[note.lane]; roundedRect(noteX, y, noteWidth, noteHeight, note.type === "slide" ? 18 : 12); ctx.shadowBlur = 0;
-      const slideMark = note.targetLane > note.lane ? "›" : "‹";
-      ctx.fillStyle = "#fff"; ctx.font = note.type === "hold" ? "900 10px Segoe UI" : "900 17px Segoe UI"; ctx.textAlign = "center"; ctx.fillText(note.type === "hold" ? "HOLD" : note.type === "slide" ? slideMark : "▼", noteX + noteWidth / 2, y + noteHeight * .7);
     }
 
     particles = particles.filter((particle) => particle.life > 0);
