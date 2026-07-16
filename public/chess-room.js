@@ -8,7 +8,7 @@ let code = ""; let token = ""; let color = "w"; let state = null; let ready = fa
 
 function showNotice(message) { notice.textContent = message; notice.hidden = false; clearTimeout(showNotice.timer); showNotice.timer = setTimeout(() => { notice.hidden = true; }, 3200); }
 async function request(method, payload, query = "") {
-  const response = await fetch(`${API}${query}`, { method, headers: method === "POST" ? { "content-type":"application/json" } : {}, body: method === "POST" ? JSON.stringify(payload) : undefined });
+  const response = await fetch(`${API}${query}`, { method, credentials:"include", headers: method === "POST" ? { "content-type":"application/json" } : {}, body: method === "POST" ? JSON.stringify(payload) : undefined });
   const data = await response.json().catch(() => ({ error:"The room service did not respond" }));
   if (!response.ok) throw new Error(data.error || "Something went wrong");
   return data;

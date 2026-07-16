@@ -6,7 +6,7 @@ const codeCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 function cors(request: Request) {
   const origin = request.headers.get("origin") || "";
-  return { "content-type": "application/json", "cache-control": "no-store", ...(allowedOrigins.has(origin) ? { "access-control-allow-origin": origin, vary: "Origin" } : {}) };
+  return { "content-type": "application/json", "cache-control": "no-store", ...(allowedOrigins.has(origin) ? { "access-control-allow-origin": origin, "access-control-allow-credentials": "true", vary: "Origin" } : {}) };
 }
 
 function json(request: Request, body: unknown, status = 200) { return Response.json(body, { status, headers: cors(request) }); }
