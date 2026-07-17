@@ -57,6 +57,7 @@
   box-shadow: inset 0 0 90px #2c180da8, 0 24px 55px #33211733;
   isolation: isolate;
   transform-style: preserve-3d;
+  pointer-events: none;
 }
 
 .table-scene::before {
@@ -102,6 +103,7 @@
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
   transition: transform .55s cubic-bezier(.2,.8,.2,1);
+  pointer-events: auto;
 }
 
 .table-scene .board::before {
@@ -119,6 +121,7 @@
   overflow: visible;
   transform-style: preserve-3d;
   border-radius: 0;
+  pointer-events: auto;
 }
 
 .table-scene .square.light {
