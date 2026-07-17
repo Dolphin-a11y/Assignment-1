@@ -1,5 +1,6 @@
 .board-wrap {
   --camera-tilt: 53deg;
+  --board-depth-scale: .72;
   --board-turn: 0deg;
   perspective: 1500px;
   perspective-origin: 50% 36%;
@@ -57,7 +58,7 @@
   box-shadow: inset 0 0 90px #2c180da8, 0 24px 55px #33211733;
   isolation: isolate;
   transform-style: preserve-3d;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .table-scene::before {
@@ -99,7 +100,7 @@
     0 22px 30px #160c0788,
     inset 0 0 0 3px #b98651,
     inset 0 0 18px #130b06;
-  transform: translate3d(0, 0, 44px) rotateX(var(--camera-tilt)) rotateZ(var(--board-turn));
+  transform: rotateZ(var(--board-turn)) skewX(-3deg) scaleY(var(--board-depth-scale));
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
   transition: transform .55s cubic-bezier(.2,.8,.2,1);
@@ -151,7 +152,7 @@
   font-family: Georgia, "Segoe UI Symbol", serif;
   font-size: .92em;
   filter: none;
-  transform: rotateZ(calc(-1 * var(--board-turn))) rotateX(calc(-1 * var(--camera-tilt))) translateY(-7%) translateZ(28px) scale(1.2);
+  transform: rotateZ(calc(-1 * var(--board-turn))) scaleY(1.39) skewX(3deg) translateY(-7%) scale(1.2);
   transform-origin: 50% 82%;
   transition: transform .2s, filter .2s;
   will-change: transform;
@@ -216,7 +217,7 @@
 }
 
 .table-scene .square:hover .piece {
-  transform: rotateZ(calc(-1 * var(--board-turn))) rotateX(calc(-1 * var(--camera-tilt))) translateY(-14%) translateZ(35px) scale(1.24);
+  transform: rotateZ(calc(-1 * var(--board-turn))) scaleY(1.39) skewX(3deg) translateY(-14%) scale(1.24);
   filter: brightness(1.12);
 }
 
@@ -234,12 +235,12 @@
 }
 
 @media (max-width: 760px) {
-  .board-wrap { --camera-tilt: 46deg; perspective-origin: 50% 30%; }
+  .board-wrap { --camera-tilt: 46deg; --board-depth-scale: .8; perspective-origin: 50% 30%; }
   .table-scene { min-height: min(520px, 112vw); border-radius: 22px; }
   .table-scene .board { width: min(86vw, 560px); border-width: 10px; }
   .table-scene .board::before { inset: -8px; }
-  .table-scene .piece { font-size: .84em; transform: rotateZ(calc(-1 * var(--board-turn))) rotateX(calc(-1 * var(--camera-tilt))) translateY(-5%) translateZ(18px) scale(1.1); }
-  .table-scene .square:hover .piece { transform: rotateZ(calc(-1 * var(--board-turn))) rotateX(calc(-1 * var(--camera-tilt))) translateY(-10%) translateZ(24px) scale(1.14); }
+  .table-scene .piece { font-size: .84em; transform: rotateZ(calc(-1 * var(--board-turn))) scaleY(1.25) skewX(3deg) translateY(-5%) scale(1.1); }
+  .table-scene .square:hover .piece { transform: rotateZ(calc(-1 * var(--board-turn))) scaleY(1.25) skewX(3deg) translateY(-10%) scale(1.14); }
 }
 
 @media (prefers-reduced-motion: reduce) {
