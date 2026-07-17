@@ -56,6 +56,7 @@
     #7a492d;
   box-shadow: inset 0 0 90px #2c180da8, 0 24px 55px #33211733;
   isolation: isolate;
+  transform-style: preserve-3d;
 }
 
 .table-scene::before {
@@ -85,6 +86,7 @@
 
 .table-scene .board {
   position: relative;
+  z-index: 2;
   width: min(620px, 82vw);
   overflow: visible;
   border: 18px solid #694326;
@@ -96,7 +98,7 @@
     0 22px 30px #160c0788,
     inset 0 0 0 3px #b98651,
     inset 0 0 18px #130b06;
-  transform: rotateX(var(--camera-tilt)) rotateZ(var(--board-turn));
+  transform: translate3d(0, 0, 44px) rotateX(var(--camera-tilt)) rotateZ(var(--board-turn));
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
   transition: transform .55s cubic-bezier(.2,.8,.2,1);
