@@ -286,7 +286,7 @@ function CalmChessGame() {
   return (
     <div className="game-shell calm-chess-game">
       <div className="game-top"><span>Play with AI or create a room for a friend</span><strong>Calm chess your way</strong></div>
-      <iframe className="chess-frame" src="/chess-room.html?v=9" title="3D AI and two-player chess" />
+      <iframe className="chess-frame" src="/chess-room.html?v=10" title="3D AI and two-player chess" />
     </div>
   );
 }
