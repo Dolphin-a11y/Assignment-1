@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type CheckIn = { id: number; level: number; label: string; time: string };
+type StressKey = "low" | "balanced" | "moderate" | "high";
+type GameOption = { id: string; title: string; description: string };
 
 type AudioNodeLike = { connect: (destination: unknown) => AudioNodeLike; dispose: () => void };
 type GainNodeLike = AudioNodeLike & { toDestination: () => GainNodeLike };
@@ -41,10 +43,40 @@ const videos = [
   { title: "Calm your mind meditation", length: "10 min", id: "O-6f5wQXSu8", tone: "blue" },
 ];
 
-function stressInfo(level: number) {
-  if (level <= 3) return { key: "low", label: "Calm & steady", note: "Invite a friend into a quiet game together.", color: "#2f5141", game: "Calm Chess" };
-  if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#6f927f", game: "Your 3D Jigsaw" };
-  return { key: "high", label: "Feeling overloaded", note: "No rush. Turn a familiar song into a gentle focus game.", color: "#6a5d9d", game: "Your Song Rhythm" };
+function stressInfo(level: number): { key: StressKey; label: string; note: string; color: string } {
+  if (level <= 2) return { key: "low", label: "Calm & steady", note: "Enjoy a thoughtful game at an unhurried pace.", color: "#2f5141" };
+  if (level <= 5) return { key: "balanced", label: "Balanced & open", note: "A tactile challenge can keep your mind gently engaged.", color: "#4f8069" };
+  if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#b86b37" };
+  return { key: "high", label: "Feeling overloaded", note: "No rush. Follow a simple rhythm or calming pattern.", color: "#6a5d9d" };
+}
+
+const gameCatalog: Record<StressKey, GameOption[]> = {
+  low: [
+    { id: "calm-chess", title: "Calm 3D Chess", description: "Play with the gentle AI or invite a friend into a quiet chess room." },
+    { id: "calm-focus", title: "Drifting Focus", description: "Follow a softly moving orb for a short, playful attention break." },
+    { id: "calm-memory", title: "Garden Memory", description: "Match peaceful symbols and let your attention settle naturally." },
+  ],
+  balanced: [
+    { id: "balanced-jigsaw", title: "Your 3D Jigsaw", description: "Build a tactile puzzle from a Drift scene or an image of your own." },
+    { id: "balanced-swap", title: "Picture Pieces", description: "Swap image tiles until the calming scene becomes whole again." },
+    { id: "balanced-memory", title: "Gentle Pairs", description: "Turn over cards and find the matching nature pairs." },
+  ],
+  moderate: [
+    { id: "moderate-hidden", title: "Hidden Object Room", description: "Search a detailed 3D room for one small object at a time." },
+    { id: "moderate-focus", title: "Focus Sprint", description: "Channel busy thoughts into a simple twenty-second challenge." },
+    { id: "moderate-puzzle", title: "Quick Picture Puzzle", description: "Redirect your attention by rebuilding a small scenic puzzle." },
+  ],
+  high: [
+    { id: "high-song", title: "Your Song Rhythm", description: "Upload a favourite song and follow its rhythm using your keyboard." },
+    { id: "high-breathe", title: "Guided Breathing", description: "Follow a slow inhale, gentle hold, and longer exhale." },
+    { id: "high-echo", title: "Gentle Rhythm Echo", description: "Listen to a soft musical pattern and repeat it one beat at a time." },
+  ],
+};
+
+function pickGame(key: StressKey, avoid?: string) {
+  const options = gameCatalog[key];
+  const choices = options.filter((option) => option.id !== avoid);
+  return choices[Math.floor(Math.random() * choices.length)] || options[0];
 }
 
 function shuffle(size = 9) {
@@ -318,18 +350,74 @@ function PuzzleGame() {
   );
 }
 
+function MemoryMatchGame() {
+  const symbols = ["☘", "☀", "☁", "✿", "❋", "◌"];
+  const makeCards = () => shuffle(12).map((position) => ({ id: position, symbol: symbols[position % symbols.length] }));
+  const [cards, setCards] = useState(makeCards);
+  const [open, setOpen] = useState<number[]>([]);
+  const [matched, setMatched] = useState<string[]>([]);
+
+  function reset() { setCards(makeCards()); setOpen([]); setMatched([]); }
+
+  function turn(index: number) {
+    if (open.length === 2 || open.includes(index) || matched.includes(cards[index].symbol)) return;
+    const next = [...open, index];
+    setOpen(next);
+    if (next.length === 2) {
+      if (cards[next[0]].symbol === cards[next[1]].symbol) {
+        window.setTimeout(() => { setMatched((items) => [...items, cards[next[0]].symbol]); setOpen([]); }, 420);
+      } else window.setTimeout(() => setOpen([]), 720);
+    }
+  }
+
+  return (
+    <div className="game-shell memory-game">
+      <div className="game-top"><span>Find all six peaceful pairs</span><button className="text-button" onClick={reset}>New cards</button></div>
+      <div className="memory-field">
+        <div className="memory-grid">{cards.map((card, index) => {
+          const visible = open.includes(index) || matched.includes(card.symbol);
+          return <button type="button" key={card.id} className={visible ? "revealed" : ""} onClick={() => turn(index)} aria-label={visible ? card.symbol : `Hidden card ${index + 1}`}><span>{visible ? card.symbol : "?"}</span></button>;
+        })}</div>
+        {matched.length === symbols.length && <div className="memory-complete"><strong>All pairs found</strong><span>A small moment of steady focus.</span><button onClick={reset}>Play again</button></div>}
+      </div>
+    </div>
+  );
+}
+
+function GeneratedGame({ id }: { id: string }) {
+  if (id === "calm-chess") return <CalmChessGame />;
+  if (id === "calm-focus" || id === "moderate-focus") return <FocusGame />;
+  if (id === "calm-memory" || id === "balanced-memory") return <MemoryMatchGame />;
+  if (id === "balanced-jigsaw") return <Jigsaw3DGame />;
+  if (id === "balanced-swap" || id === "moderate-puzzle") return <PuzzleGame />;
+  if (id === "moderate-hidden") return <FindGame />;
+  if (id === "high-breathe") return <BreathingGame />;
+  if (id === "high-echo") return <RhythmGame />;
+  return <CustomSongRhythmGame />;
+}
+
 export default function Home() {
   const [stress, setStress] = useState(5);
   const [soundOn, setSoundOn] = useState(false);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [saved, setSaved] = useState(false);
+  const [gameId, setGameId] = useState("balanced-jigsaw");
   const soundRef = useRef<{ dispose: () => void } | null>(null);
   const info = stressInfo(stress);
+  const currentGame = gameCatalog[info.key].find((game) => game.id === gameId) || gameCatalog[info.key][0];
 
   useEffect(() => {
     const stored = localStorage.getItem("drift-checkins");
     if (stored) { try { setCheckIns(JSON.parse(stored)); } catch { /* ignore invalid local data */ } }
   }, []);
+
+  useEffect(() => {
+    const storageKey = `drift-last-game-${info.key}`;
+    const previous = sessionStorage.getItem(storageKey) || undefined;
+    const next = pickGame(info.key, previous);
+    setGameId(next.id);
+    sessionStorage.setItem(storageKey, next.id);
+  }, [info.key]);
 
   useEffect(() => {
     if (!soundOn) return;
@@ -342,13 +430,14 @@ export default function Home() {
       soundRef.current?.dispose();
       const gain = new Tone.Gain(0.16).toDestination();
       const reverb = new Tone.Reverb({ decay: info.key === "high" ? 8 : 4, wet: 0.7 }).connect(gain);
-      const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: info.key === "low" ? "triangle" : info.key === "moderate" ? "sine" : "sine" }, envelope: { attack: info.key === "low" ? 0.8 : info.key === "moderate" ? 2.2 : 3.8, release: info.key === "high" ? 7 : 4 } }).connect(reverb);
-      const notes = info.key === "low" ? ["C4", "E4", "G4", "C5", "G4", "E4"] : info.key === "moderate" ? ["A3", "C4", "E4", "G4", "E4", "C4"] : ["F3", "C4", "A3", "G3"];
+      const middleStress = info.key === "balanced" || info.key === "moderate";
+      const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: info.key === "low" ? "triangle" : "sine" }, envelope: { attack: info.key === "low" ? 0.8 : middleStress ? 2.2 : 3.8, release: info.key === "high" ? 7 : 4 } }).connect(reverb);
+      const notes = info.key === "low" ? ["C4", "E4", "G4", "C5", "G4", "E4"] : middleStress ? ["A3", "C4", "E4", "G4", "E4", "C4"] : ["F3", "C4", "A3", "G3"];
       let step = 0;
-      const duration = info.key === "low" ? "4n" : info.key === "moderate" ? "2n" : "1m";
-      const interval = info.key === "low" ? "4n" : info.key === "moderate" ? "2n" : "1m";
+      const duration = info.key === "low" ? "4n" : middleStress ? "2n" : "1m";
+      const interval = info.key === "low" ? "4n" : middleStress ? "2n" : "1m";
       const loop = new Tone.Loop((time) => { synth.triggerAttackRelease(notes[step++ % notes.length], duration, time, info.key === "high" ? 0.42 : 0.52); }, interval).start(0);
-      Tone.getTransport().bpm.value = info.key === "low" ? 78 : info.key === "moderate" ? 60 : 44;
+      Tone.getTransport().bpm.value = info.key === "low" ? 78 : middleStress ? 60 : 44;
       Tone.getTransport().start();
       soundRef.current = { dispose: () => { loop.dispose(); synth.dispose(); reverb.dispose(); gain.dispose(); } };
     }
@@ -368,6 +457,12 @@ export default function Home() {
     setSaved(true); window.setTimeout(() => setSaved(false), 1800);
   }
 
+  function generateAnotherGame() {
+    const next = pickGame(info.key, currentGame.id);
+    setGameId(next.id);
+    sessionStorage.setItem(`drift-last-game-${info.key}`, next.id);
+  }
+
   return (
     <main className={`app theme-${info.key}`}>
       <div className="ambient ambient-one" /><div className="ambient ambient-two" />
@@ -379,14 +474,15 @@ export default function Home() {
         <p>No judgement. Slide to where you are and we’ll shape a small moment of relief around you.</p>
         <div className="checkin-card">
           <div className="status-row"><div><span className="status-dot" /><strong>{info.label}</strong><small>{info.note}</small></div><div className="level"><strong>{stress}</strong><span>/ 10</span></div></div>
-          <div className="slider-wrap"><input aria-label="Current stress level" type="range" min="1" max="10" value={stress} onChange={(e) => setStress(Number(e.target.value))} style={{ "--progress": `${(stress - 1) / 9 * 100}%` } as React.CSSProperties} /><div className="slider-labels"><span>Calm</span><span>Balanced</span><span>Overwhelmed</span></div></div>
+          <div className="slider-wrap"><input aria-label="Current stress level" type="range" min="1" max="10" value={stress} onChange={(e) => setStress(Number(e.target.value))} style={{ "--progress": `${(stress - 1) / 9 * 100}%` } as React.CSSProperties} /><div className="slider-labels"><span>Calm</span><span>Balanced</span><span>Moderate</span><span>Overwhelmed</span></div></div>
           <button className="primary" onClick={saveCheckIn}>{saved ? "Check-in saved ✓" : "Save today’s check-in"}</button>
         </div>
       </section>
 
       <section className="game-section">
-        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Your mindful diversion</div><h2>{info.game}</h2></div></div><p>{info.key === "low" ? "Create a room code, invite a friend, and take turns moving black and white pieces at an unhurried pace." : info.key === "moderate" ? "Slow down with a tactile 3D puzzle made from a Drift image or one of your own." : "Choose a song you enjoy and turn it into a private four-lane rhythm challenge."}</p></div>
-        {info.key === "low" ? <CalmChessGame /> : info.key === "moderate" ? <Jigsaw3DGame /> : <CustomSongRhythmGame />}
+        <div className="section-intro"><div><span className="section-number">01</span><div><div className="eyebrow">Generated for {info.label}</div><h2>{currentGame.title}</h2></div></div><p>{currentGame.description}</p></div>
+        <div className="game-generator"><div><span>{gameCatalog[info.key].length} games in this stress category</span><strong>A different choice is generated when you reload.</strong></div><button type="button" onClick={generateAnotherGame}>Generate another game <span aria-hidden="true">↻</span></button></div>
+        <GeneratedGame key={currentGame.id} id={currentGame.id} />
       </section>
 
       <section className="video-section">

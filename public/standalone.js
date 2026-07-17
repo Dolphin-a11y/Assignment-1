@@ -31,11 +31,44 @@
   let soundOn = false;
   let soundSession = null;
   let currentMode = "";
+  let currentGameId = "";
+
+  const sliderLabels = document.querySelector(".slider-labels");
+  if (sliderLabels) sliderLabels.innerHTML = "<span>Calm</span><span>Balanced</span><span>Moderate</span><span>Overwhelmed</span>";
 
   function stressInfo(level) {
-    if (level <= 3) return { key: "low", label: "Calm & steady", note: "Invite a friend into a quiet game together.", game: "Calm Chess", copy: "Create a room code, invite a friend, and take turns moving black and white pieces at an unhurried pace." };
-    if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", game: "Your 3D Jigsaw", copy: "Slow down with a tactile 3D puzzle made from a Drift image or one of your own." };
-    return { key: "high", label: "Feeling overloaded", note: "No rush. Turn a familiar song into a gentle focus game.", game: "Your Song Rhythm", copy: "Choose a song you enjoy and turn it into a private four-lane rhythm challenge." };
+    if (level <= 2) return { key: "low", label: "Calm & steady", note: "Enjoy a thoughtful game at an unhurried pace." };
+    if (level <= 5) return { key: "balanced", label: "Balanced & open", note: "A tactile challenge can keep your mind gently engaged." };
+    if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention." };
+    return { key: "high", label: "Feeling overloaded", note: "No rush. Follow a simple rhythm or calming pattern." };
+  }
+
+  const gameCatalog = {
+    low: [
+      { id: "calm-chess", title: "Calm 3D Chess", copy: "Play with the gentle AI or invite a friend into a quiet chess room." },
+      { id: "calm-focus", title: "Drifting Focus", copy: "Follow a softly moving orb for a short, playful attention break." },
+      { id: "calm-memory", title: "Garden Memory", copy: "Match peaceful symbols and let your attention settle naturally." },
+    ],
+    balanced: [
+      { id: "balanced-jigsaw", title: "Your 3D Jigsaw", copy: "Build a tactile puzzle from a Drift scene or an image of your own." },
+      { id: "balanced-swap", title: "Picture Pieces", copy: "Swap image tiles until the calming scene becomes whole again." },
+      { id: "balanced-memory", title: "Gentle Pairs", copy: "Turn over cards and find the matching nature pairs." },
+    ],
+    moderate: [
+      { id: "moderate-hidden", title: "Hidden Object Room", copy: "Search a detailed 3D room for one small object at a time." },
+      { id: "moderate-focus", title: "Focus Sprint", copy: "Channel busy thoughts into a simple twenty-second challenge." },
+      { id: "moderate-puzzle", title: "Quick Picture Puzzle", copy: "Redirect your attention by rebuilding a small scenic puzzle." },
+    ],
+    high: [
+      { id: "high-song", title: "Your Song Rhythm", copy: "Upload a favourite song and follow its rhythm using your keyboard." },
+      { id: "high-breathe", title: "Guided Breathing", copy: "Follow a slow inhale, gentle hold, and longer exhale." },
+      { id: "high-echo", title: "Gentle Rhythm Echo", copy: "Listen to a soft musical pattern and repeat it one beat at a time." },
+    ],
+  };
+
+  function pickGame(key, avoid) {
+    const choices = gameCatalog[key].filter((game) => game.id !== avoid);
+    return choices[Math.floor(Math.random() * choices.length)] || gameCatalog[key][0];
   }
 
   function shuffle(size = 9) {
@@ -133,6 +166,49 @@
       imageIndex = Number(button.dataset.image); tiles = shuffle(); selected = null;
       gameSection.querySelectorAll(".scene-picker button").forEach((item) => item.classList.toggle("active", item === button)); draw();
     }));
+    draw();
+  }
+
+  function renderMemory() {
+    const symbols = ["☘", "☀", "☁", "✿", "❋", "◌"];
+    let cards = shuffle(12).map((position) => ({ id: position, symbol: symbols[position % symbols.length] }));
+    let open = [];
+    let matched = [];
+    gameShell().outerHTML = `<div class="game-shell memory-game"><div class="game-top"><span>Find all six peaceful pairs</span><button type="button" class="text-button memory-reset">New cards</button></div><div class="memory-field"><div class="memory-grid"></div></div></div>`;
+    const field = gameSection.querySelector(".memory-field");
+    const grid = field.querySelector(".memory-grid");
+
+    function draw() {
+      grid.innerHTML = cards.map((card, index) => {
+        const visible = open.includes(index) || matched.includes(card.symbol);
+        return `<button type="button" data-card="${index}" class="${visible ? "revealed" : ""}" aria-label="${visible ? card.symbol : `Hidden card ${index + 1}`}"><span>${visible ? card.symbol : "?"}</span></button>`;
+      }).join("");
+      grid.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => turn(Number(button.dataset.card))));
+      if (matched.length === symbols.length && !field.querySelector(".memory-complete")) {
+        field.insertAdjacentHTML("beforeend", '<div class="memory-complete"><strong>All pairs found</strong><span>A small moment of steady focus.</span><button type="button">Play again</button></div>');
+        field.querySelector(".memory-complete button").addEventListener("click", reset);
+      }
+    }
+
+    function turn(index) {
+      if (open.length === 2 || open.includes(index) || matched.includes(cards[index].symbol)) return;
+      open.push(index); draw();
+      if (open.length === 2) {
+        const pair = [...open];
+        window.setTimeout(() => {
+          if (cards[pair[0]].symbol === cards[pair[1]].symbol) matched.push(cards[pair[0]].symbol);
+          open = []; draw();
+        }, cards[pair[0]].symbol === cards[pair[1]].symbol ? 420 : 720);
+      }
+    }
+
+    function reset() {
+      cards = shuffle(12).map((position) => ({ id: position, symbol: symbols[position % symbols.length] }));
+      open = []; matched = [];
+      field.querySelector(".memory-complete")?.remove(); draw();
+    }
+
+    gameSection.querySelector(".memory-reset").addEventListener("click", reset);
     draw();
   }
 
@@ -263,6 +339,31 @@
     gameShell().outerHTML = `<div class="game-shell calm-chess-game"><div class="game-top"><span>Play with AI or create a room for a friend</span><strong>3D calm chess your way</strong></div><iframe class="chess-frame" src="./chess-room.html?v=12" title="3D AI and two-player chess"></iframe></div>`;
   }
 
+  gameSection.querySelector(".section-intro").insertAdjacentHTML("afterend", '<div class="game-generator"><div><span class="generator-count"></span><strong>A different choice is generated when you reload.</strong></div><button type="button">Generate another game <span aria-hidden="true">↻</span></button></div>');
+  const generatorCount = gameSection.querySelector(".generator-count");
+
+  function renderGame(game) {
+    gameTitle.textContent = game.title;
+    gameCopy.textContent = game.copy;
+    currentGameId = game.id;
+    if (game.id === "calm-chess") renderCalmChess();
+    else if (game.id === "calm-focus" || game.id === "moderate-focus") renderFocus();
+    else if (game.id === "calm-memory" || game.id === "balanced-memory") renderMemory();
+    else if (game.id === "balanced-jigsaw") renderJigsaw3D();
+    else if (game.id === "balanced-swap" || game.id === "moderate-puzzle") renderPuzzle();
+    else if (game.id === "moderate-hidden") renderFind();
+    else if (game.id === "high-breathe") renderBreathing();
+    else if (game.id === "high-echo") renderRhythm();
+    else renderCustomSongRhythm();
+  }
+
+  function generateGame(key, avoid) {
+    const next = pickGame(key, avoid);
+    sessionStorage.setItem(`drift-last-game-${key}`, next.id);
+    generatorCount.textContent = `${gameCatalog[key].length} games in this stress category`;
+    renderGame(next);
+  }
+
   function renderExperience(force = false) {
     const info = stressInfo(stress);
     app.className = `app theme-${info.key}`;
@@ -270,13 +371,10 @@
     statusTitle.textContent = info.label;
     statusNote.textContent = info.note;
     levelNumber.textContent = stress;
-    gameTitle.textContent = info.game;
-    gameCopy.textContent = info.copy;
     if (!force && currentMode === info.key) return;
     currentMode = info.key;
-    if (info.key === "low") renderCalmChess();
-    else if (info.key === "moderate") renderJigsaw3D();
-    else renderCustomSongRhythm();
+    const previous = sessionStorage.getItem(`drift-last-game-${info.key}`) || undefined;
+    generateGame(info.key, previous);
     if (soundOn) restartSound();
   }
 
@@ -328,18 +426,20 @@
     const info = stressInfo(stress);
     const gain = new Tone.Gain(0.16).toDestination();
     const reverb = new Tone.Reverb({ decay: info.key === "high" ? 8 : 4, wet: 0.7 }).connect(gain);
-    const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: info.key === "low" ? "triangle" : "sine" }, envelope: { attack: info.key === "low" ? 0.8 : info.key === "moderate" ? 2.2 : 3.8, release: info.key === "high" ? 7 : 4 } }).connect(reverb);
-    const notes = info.key === "low" ? ["C4", "E4", "G4", "C5", "G4", "E4"] : info.key === "moderate" ? ["A3", "C4", "E4", "G4", "E4", "C4"] : ["F3", "C4", "A3", "G3"];
+    const middleStress = info.key === "balanced" || info.key === "moderate";
+    const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: info.key === "low" ? "triangle" : "sine" }, envelope: { attack: info.key === "low" ? 0.8 : middleStress ? 2.2 : 3.8, release: info.key === "high" ? 7 : 4 } }).connect(reverb);
+    const notes = info.key === "low" ? ["C4", "E4", "G4", "C5", "G4", "E4"] : middleStress ? ["A3", "C4", "E4", "G4", "E4", "C4"] : ["F3", "C4", "A3", "G3"];
     let step = 0;
-    const duration = info.key === "low" ? "4n" : info.key === "moderate" ? "2n" : "1m";
-    const interval = info.key === "low" ? "4n" : info.key === "moderate" ? "2n" : "1m";
+    const duration = info.key === "low" ? "4n" : middleStress ? "2n" : "1m";
+    const interval = info.key === "low" ? "4n" : middleStress ? "2n" : "1m";
     const loop = new Tone.Loop((time) => synth.triggerAttackRelease(notes[step++ % notes.length], duration, time, info.key === "high" ? 0.42 : 0.52), interval).start(0);
-    Tone.getTransport().bpm.value = info.key === "low" ? 78 : info.key === "moderate" ? 60 : 44;
+    Tone.getTransport().bpm.value = info.key === "low" ? 78 : middleStress ? 60 : 44;
     Tone.getTransport().start();
     soundSession = { dispose: () => { loop.dispose(); synth.dispose(); reverb.dispose(); gain.dispose(); } };
   }
 
   slider.addEventListener("input", () => { stress = Number(slider.value); renderExperience(); });
+  gameSection.querySelector(".game-generator button").addEventListener("click", () => generateGame(stressInfo(stress).key, currentGameId));
   saveButton.addEventListener("click", () => {
     const info = stressInfo(stress);
     let checkIns = [];

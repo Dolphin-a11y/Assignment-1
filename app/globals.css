@@ -9,6 +9,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .app { --accent: #b86b37; --accent-soft: #ebc6aa; --wash: #f2dfcf; min-height: 100vh; overflow: hidden; background: linear-gradient(180deg, var(--wash) 0, var(--paper) 660px); transition: background .8s ease; position: relative; }
 .app.theme-low { --accent: #2f7d63; --accent-soft: #abd5c2; --wash: #dceee5; }
+.app.theme-balanced { --accent: #4f8069; --accent-soft: #b8d8c7; --wash: #e0eee6; }
 .app.theme-high { --accent: #6a5d9d; --accent-soft: #c8bfe3; --wash: #e7e0f2; }
 .ambient { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(8px); opacity: .65; animation: drift 10s ease-in-out infinite alternate; }
 .ambient-one { width: 450px; height: 450px; top: 70px; right: -180px; background: radial-gradient(circle, var(--accent-soft), transparent 68%); }
@@ -51,6 +52,12 @@ input[type="range"]::-webkit-slider-thumb { appearance: none; width: 25px; heigh
 h2 { font-size: clamp(36px, 5vw, 55px); margin-top: 7px; }
 .section-intro p { line-height: 1.7; opacity: .62; margin: 0; }
 .game-shell { background: rgba(255,255,255,.53); border: 1px solid rgba(255,255,255,.8); border-radius: 30px; overflow: hidden; box-shadow: 0 18px 60px rgba(41,50,43,.08); }
+.game-generator { margin: -14px 0 20px 57px; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.48); }
+.game-generator > div { display: flex; flex-direction: column; gap: 3px; }
+.game-generator span { color: var(--accent); font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.game-generator strong { font-size: 12px; font-weight: 500; opacity: .62; }
+.game-generator button { flex: none; padding: 11px 16px; border: 0; border-radius: 99px; color: #fff; background: var(--accent); cursor: pointer; font-size: 12px; font-weight: 750; }
+.game-generator button span { margin-left: 5px; color: inherit; font-size: 15px; }
 .game-top { height: 66px; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); font-size: 13px; }
 .game-top strong { color: var(--accent); }
 .text-button { border: 0; color: var(--accent); cursor: pointer; background: transparent; font-weight: 700; }
@@ -60,6 +67,17 @@ h2 { font-size: clamp(36px, 5vw, 55px); margin-top: 7px; }
 .focus-orb { position: absolute; width: 58px; height: 58px; transform: translate(-50%, -50%); border-radius: 50%; border: 0; background: radial-gradient(circle at 35% 28%, white, var(--accent) 60%); box-shadow: 0 0 0 13px color-mix(in srgb, var(--accent) 13%, transparent), 0 10px 30px rgba(0,0,0,.15); cursor: pointer; z-index: 2; transition: left .25s, top .25s; }
 .game-message { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 18px; z-index: 2; }
 .game-message span { font-family: Georgia, serif; font-size: 28px; }
+.memory-field { min-height: 460px; padding: 36px; position: relative; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--accent-soft) 58%, white), rgba(255,255,255,.5)); }
+.memory-grid { width: min(650px, 100%); display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.memory-grid button { aspect-ratio: 1; border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); border-radius: 22px; color: #fff; background: linear-gradient(145deg, var(--accent), color-mix(in srgb, var(--accent) 72%, #202d29)); cursor: pointer; box-shadow: 0 12px 24px color-mix(in srgb, var(--accent) 20%, transparent), inset 0 1px #ffffff70; transition: transform .28s, background .28s; }
+.memory-grid button:hover { transform: translateY(-3px); }
+.memory-grid button.revealed { color: var(--ink); background: rgba(255,255,255,.88); transform: rotateY(180deg); }
+.memory-grid button span { display: inline-block; font: 32px Georgia, serif; }
+.memory-grid button.revealed span { transform: rotateY(180deg); }
+.memory-complete { position: absolute; inset: 25%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border-radius: 24px; text-align: center; background: rgba(255,255,255,.94); box-shadow: 0 24px 70px rgba(0,0,0,.15); }
+.memory-complete strong { font: 28px Georgia, serif; }
+.memory-complete span { opacity: .6; font-size: 13px; }
+.memory-complete button { padding: 11px 17px; border: 0; border-radius: 99px; color: #fff; background: var(--accent); cursor: pointer; }
 .room-scene { min-height: 430px; position: relative; overflow: hidden; background: linear-gradient(180deg, #e7d6bf 0 72%, #b98f6e 72%); }
 .room-scene::before { content: ""; position: absolute; inset: 72% 0 auto; height: 8px; background: #8b634d; box-shadow: 0 22px 50px rgba(78,49,36,.22); }
 .room-window { position: absolute; left: 8%; top: 12%; width: 22%; height: 36%; display: grid; grid-template-columns: 1fr 1fr; border: 9px solid #8d654d; border-radius: 5px; background: linear-gradient(#9bc8d4, #e9d5b1); box-shadow: inset 0 0 0 2px rgba(255,255,255,.45); }
@@ -172,6 +190,12 @@ footer small { text-align: right; opacity: .45; font-size: 10px; }
   .hero { padding: 70px 20px; } .checkin-card { padding: 22px 20px; } .status-row small { display: none; }
   .game-section, .progress-section, .video-section { padding: 72px 20px; }
   .section-intro { grid-template-columns: 1fr; gap: 18px; } .section-intro p { padding-left: 57px; }
+  .game-generator { margin: -8px 0 16px; align-items: stretch; flex-direction: column; }
+  .game-generator button { width: 100%; }
+  .memory-field { min-height: 390px; padding: 18px; }
+  .memory-grid { gap: 8px; }
+  .memory-grid button { border-radius: 14px; }
+  .memory-complete { inset: 20% 8%; }
   .focus-field, .room-scene { height: 360px; min-height: 360px; } .room-sofa { left: 24%; width: 50%; } .room-frame { right: 6%; width: 17%; } .room-plant { display: none; }
   .found-message { inset: 24% 9%; } .puzzle-layout { grid-template-columns: 1fr; padding: 16px; } .scene-picker { flex-direction: row; overflow: auto; } .scene-picker > span { display: none; } .scene-picker button { flex: 0 0 auto; } .scene-picker button span { display: none; }
   .progress-card { padding: 25px 18px 18px; } .chart { gap: 5px; padding-left: 0; padding-right: 0; } .video-grid { grid-template-columns: 1fr; }
