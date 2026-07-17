@@ -22,6 +22,7 @@ let peer = null;
 let connection = null;
 let isHost = false;
 let movePending = false;
+let cameraTurn = 0;
 
 function showNotice(message) {
   notice.textContent = message;
@@ -79,6 +80,17 @@ function render() {
     }
     boardElement.appendChild(square);
   }
+}
+
+function updateCamera() {
+  boardElement.style.setProperty("--board-turn", `${cameraTurn}deg`);
+  const label = cameraTurn === 0 ? "Front view" : cameraTurn > 0 ? `Right ${cameraTurn}°` : `Left ${Math.abs(cameraTurn)}°`;
+  document.querySelector("#reset-view").textContent = label;
+}
+
+function rotateCamera(direction) {
+  cameraTurn = Math.max(-45, Math.min(45, cameraTurn + direction * 15));
+  updateCamera();
 }
 
 function send(message) {
@@ -276,6 +288,15 @@ document.querySelector("#reset-game").addEventListener("click", () => {
   if (isHost) { state = initialState(); selected = null; movePending = false; render(); sendState(); }
   else if (!send({ type:"reset" })) showNotice("The connection was lost. Ask your friend to create a new room.");
 });
+document.querySelector("#rotate-left").addEventListener("click", () => rotateCamera(-1));
+document.querySelector("#rotate-right").addEventListener("click", () => rotateCamera(1));
+document.querySelector("#reset-view").addEventListener("click", () => { cameraTurn = 0; updateCamera(); });
+document.addEventListener("keydown", (event) => {
+  if (game.hidden || event.target.matches("input, button")) return;
+  if (event.key === "ArrowLeft") rotateCamera(-1);
+  if (event.key === "ArrowRight") rotateCamera(1);
+});
+updateCamera();
 window.addEventListener("beforeunload", destroyPeer);
 
 const params = new URLSearchParams(location.search);

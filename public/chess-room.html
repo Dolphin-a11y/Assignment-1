@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="./chess-room.css?v=1">
   <link rel="stylesheet" href="./chess-pieces.css?v=1">
   <link rel="stylesheet" href="./chess-modes.css?v=1">
+  <link rel="stylesheet" href="./chess-3d.css?v=1">
 </head>
 <body>
   <main class="chess-app">
@@ -41,7 +42,15 @@
         <button class="leave-room" id="leave-room" type="button">Leave room</button>
       </aside>
       <div class="board-wrap">
-        <div class="board" id="chess-board" aria-label="Chess board"></div>
+        <div class="view-controls" aria-label="3D board camera controls">
+          <button id="rotate-left" type="button" aria-label="Rotate board left">↶</button>
+          <button class="view-reset" id="reset-view" type="button">Front view</button>
+          <button id="rotate-right" type="button" aria-label="Rotate board right">↷</button>
+        </div>
+        <div class="table-scene">
+          <div class="board" id="chess-board" aria-label="Interactive 3D chess board"></div>
+        </div>
+        <p class="view-hint">Rotate the tabletop view without changing the game position.</p>
         <div class="feedback" id="feedback" role="status">Choose a piece when it is your turn.</div>
       </div>
     </section>
@@ -49,6 +58,6 @@
     <div class="notice" id="notice" role="alert" hidden></div>
     <footer><span>Two players · synchronized room · touch or click to move</span><a href="https://github.com/niklasf/python-chess" target="_blank" rel="noreferrer">Rules behavior referenced from python-chess documentation</a></footer>
   </main>
-  <script type="module" src="./chess-room.js?v=7"></script>
+  <script type="module" src="./chess-room.js?v=8"></script>
 </body>
 </html>
