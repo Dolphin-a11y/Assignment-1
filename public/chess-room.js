@@ -23,6 +23,7 @@ let connection = null;
 let isHost = false;
 let movePending = false;
 let cameraTurn = 0;
+let lastAnimatedMove = "";
 
 function showNotice(message) {
   notice.textContent = message;
@@ -54,12 +55,16 @@ function render() {
   boardElement.replaceChildren();
   const order = color === "b" ? Array.from({ length:64 }, (_, index) => 63 - index) : Array.from({ length:64 }, (_, index) => index);
   const targets = selected === null ? [] : legalMoves(state, selected).map((move) => move.to);
+  const moveKey = state.lastMove ? `${state.lastMove.from}-${state.lastMove.to}-${state.turn}` : "";
+  const shouldAnimateMove = Boolean(moveKey && moveKey !== lastAnimatedMove);
+  const squareSize = boardElement.clientWidth / 8;
   for (const index of order) {
     const row = Math.floor(index / 8);
     const column = index % 8;
     const piece = state.board[index];
     const square = document.createElement("button");
     square.type = "button";
+    square.dataset.index = String(index);
     square.className = `square ${(row + column) % 2 ? "dark" : "light"}`;
     if (selected === index) square.classList.add("selected");
     if (state.lastMove && (state.lastMove.from === index || state.lastMove.to === index)) square.classList.add("last");
@@ -76,10 +81,22 @@ function render() {
       const pieceNode = document.createElement("span");
       pieceNode.className = `piece ${piece.color === "w" ? "white" : "black"}`;
       pieceNode.textContent = symbols[piece.color + piece.type];
+      if (shouldAnimateMove && state.lastMove.to === index && squareSize > 0) {
+        const fromPosition = order.indexOf(state.lastMove.from);
+        const toPosition = order.indexOf(state.lastMove.to);
+        const fromRow = Math.floor(fromPosition / 8);
+        const fromColumn = fromPosition % 8;
+        const toRow = Math.floor(toPosition / 8);
+        const toColumn = toPosition % 8;
+        pieceNode.style.setProperty("--move-x", `${(fromColumn - toColumn) * squareSize}px`);
+        pieceNode.style.setProperty("--move-y", `${(fromRow - toRow) * squareSize}px`);
+        pieceNode.classList.add("is-moving");
+      }
       square.appendChild(pieceNode);
     }
     boardElement.appendChild(square);
   }
+  lastAnimatedMove = moveKey;
 }
 
 function updateCamera() {

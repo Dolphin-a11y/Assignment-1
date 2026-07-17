@@ -150,6 +150,28 @@
   transform-origin: 50% 82%;
   transition: transform .2s, filter .2s;
   will-change: transform;
+  pointer-events: none;
+}
+
+.table-scene .piece.is-moving {
+  animation: piece-glide .56s cubic-bezier(.16,.84,.28,1) both;
+}
+
+@keyframes piece-glide {
+  0% {
+    translate: var(--move-x) var(--move-y);
+    scale: .9;
+    filter: brightness(1.18) drop-shadow(0 10px 8px #120a0666);
+  }
+  58% {
+    scale: 1.08;
+    filter: brightness(1.1) drop-shadow(0 7px 5px #120a0644);
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+    filter: none;
+  }
 }
 
 .table-scene .piece::after {
@@ -218,4 +240,5 @@
 @media (prefers-reduced-motion: reduce) {
   .table-scene .board,
   .table-scene .piece { transition: none; }
+  .table-scene .piece.is-moving { animation: none; }
 }
