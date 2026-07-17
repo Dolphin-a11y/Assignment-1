@@ -34,35 +34,29 @@
   let currentGameId = "";
 
   const sliderLabels = document.querySelector(".slider-labels");
-  if (sliderLabels) sliderLabels.innerHTML = "<span>Calm</span><span>Balanced</span><span>Moderate</span><span>Overwhelmed</span>";
+  if (sliderLabels) sliderLabels.innerHTML = "<span>Calm</span><span>Balanced</span><span>Overwhelmed</span>";
 
   function stressInfo(level) {
-    if (level <= 2) return { key: "low", label: "Calm & steady", note: "Enjoy a thoughtful game at an unhurried pace." };
-    if (level <= 5) return { key: "balanced", label: "Balanced & open", note: "A tactile challenge can keep your mind gently engaged." };
-    if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention." };
+    if (level <= 3) return { key: "low", label: "Calm & steady", note: "Enjoy a thoughtful game at an unhurried pace." };
+    if (level <= 7) return { key: "balanced", label: "Balanced & open", note: "A tactile challenge can keep your mind gently engaged." };
     return { key: "high", label: "Feeling overloaded", note: "No rush. Follow a simple rhythm or calming pattern." };
   }
 
   const gameCatalog = {
     low: [
       { id: "calm-chess", title: "Calm 3D Chess", copy: "Play with the gentle AI or invite a friend into a quiet chess room." },
-      { id: "calm-focus", title: "Drifting Focus", copy: "Follow a softly moving orb for a short, playful attention break." },
+      { id: "calm-word", title: "Quiet Word Search", copy: "Find a peaceful word hidden among the letters." },
       { id: "calm-memory", title: "Garden Memory", copy: "Match peaceful symbols and let your attention settle naturally." },
     ],
     balanced: [
       { id: "balanced-jigsaw", title: "Your 3D Jigsaw", copy: "Build a tactile puzzle from a Drift scene or an image of your own." },
-      { id: "balanced-swap", title: "Picture Pieces", copy: "Swap image tiles until the calming scene becomes whole again." },
-      { id: "balanced-memory", title: "Gentle Pairs", copy: "Turn over cards and find the matching nature pairs." },
-    ],
-    moderate: [
-      { id: "moderate-hidden", title: "Hidden Object Room", copy: "Search a detailed 3D room for one small object at a time." },
-      { id: "moderate-focus", title: "Focus Sprint", copy: "Channel busy thoughts into a simple twenty-second challenge." },
-      { id: "moderate-puzzle", title: "Quick Picture Puzzle", copy: "Redirect your attention by rebuilding a small scenic puzzle." },
+      { id: "balanced-shapes", title: "Match the Shape", copy: "Choose the shape that matches the gentle target." },
+      { id: "balanced-draw", title: "Calm Drawing", copy: "Draw freely, choose colours, and save your picture to your device." },
     ],
     high: [
       { id: "high-song", title: "Your Song Rhythm", copy: "Upload a favourite song and follow its rhythm using your keyboard." },
       { id: "high-breathe", title: "Guided Breathing", copy: "Follow a slow inhale, gentle hold, and longer exhale." },
-      { id: "high-echo", title: "Gentle Rhythm Echo", copy: "Listen to a soft musical pattern and repeat it one beat at a time." },
+      { id: "high-bubbles", title: "Calming Bubbles", copy: "Pop slow-floating bubbles and watch the space gently clear." },
     ],
   };
 
@@ -212,6 +206,64 @@
     draw();
   }
 
+  function renderWordSearch(round = 0) {
+    const words = ["CALM", "PAUSE", "SMILE", "QUIET", "BREATHE"];
+    const word = words[round % words.length];
+    const row = (round * 3 + 1) % 7;
+    const vertical = round % 2 === 1;
+    const alphabet = "NATURESOFTLIGHTPEACEBLOOMRESTWAVESKY";
+    const letters = Array.from({ length: 49 }, (_, index) => alphabet[(index * 7 + round * 5) % alphabet.length]);
+    const targets = word.split("").map((letter, index) => { const cell = vertical ? index * 7 + row : row * 7 + index; letters[cell] = letter; return cell; });
+    let chosen = [];
+    gameShell().outerHTML = `<div class="game-shell word-game"><div class="game-top"><span>Find the word <b>${word}</b></span><strong>Round ${round + 1}</strong></div><div class="word-field"><div class="word-grid">${letters.map((letter, index) => `<button type="button" data-cell="${index}" aria-label="Letter ${letter}, row ${Math.floor(index / 7) + 1}, column ${(index % 7) + 1}">${letter}</button>`).join("")}</div></div></div>`;
+    const field = gameSection.querySelector(".word-field");
+    const buttons = [...field.querySelectorAll(".word-grid button")];
+    buttons.forEach((button) => button.addEventListener("click", () => {
+      const index = Number(button.dataset.cell);
+      chosen = chosen.length && index !== chosen[chosen.length - 1] + (vertical ? 7 : 1) ? [index] : [...chosen, index];
+      chosen = chosen.slice(-word.length);
+      buttons.forEach((item) => item.classList.toggle("chosen", chosen.includes(Number(item.dataset.cell))));
+      if (chosen.length === targets.length && chosen.every((cell, position) => cell === targets[position])) {
+        field.insertAdjacentHTML("beforeend", `<div class="word-found"><strong>You found ${word}</strong><span>Let that small success settle.</span><button type="button">New word</button></div>`);
+        field.querySelector(".word-found button").addEventListener("click", () => renderWordSearch(round + 1));
+      }
+    }));
+  }
+
+  function renderShapeMatch(round = 0) {
+    const shapes = ["●", "▲", "■", "◆", "★"];
+    const target = shapes[round % shapes.length];
+    const choices = [...shapes.slice(round % shapes.length), ...shapes.slice(0, round % shapes.length)];
+    gameShell().outerHTML = `<div class="game-shell shape-game"><div class="game-top"><span>Match shape, not colour</span><strong>Round ${round + 1}</strong></div><div class="shape-field"><div class="shape-target" aria-label="Target shape ${target}">${target}</div><strong aria-live="polite">Choose the matching shape</strong><div class="shape-choices">${choices.map((shape, index) => `<button type="button" class="shape-${index}" data-shape="${shape}" aria-label="Choose shape ${shape}">${shape}</button>`).join("")}</div></div></div>`;
+    const field = gameSection.querySelector(".shape-field");
+    const message = field.querySelector(":scope > strong");
+    field.querySelectorAll(".shape-choices button").forEach((button) => button.addEventListener("click", () => {
+      if (button.dataset.shape === target) { message.textContent = "Perfect match!"; window.setTimeout(() => renderShapeMatch(round + 1), 650); }
+      else message.textContent = "Try another shape";
+    }));
+  }
+
+  function renderDrawing() {
+    const colors = ["#4f8069", "#6a5d9d", "#d17a4a", "#397b99", "#d4a552", "#293a35"];
+    let color = colors[0]; let drawing = false;
+    gameShell().outerHTML = `<div class="game-shell drawing-game"><div class="game-top"><span>Draw anything that feels calming</span><strong>Your private canvas</strong></div><div class="drawing-field"><div class="drawing-toolbar"><div class="drawing-colors" aria-label="Drawing colours">${colors.map((item, index) => `<button type="button" data-color="${item}" aria-label="Use colour ${item}" aria-pressed="${index === 0}" style="background:${item}"></button>`).join("")}</div><div><button type="button" class="clear-drawing">Clear</button><button type="button" class="save-drawing">Save drawing</button></div></div><canvas width="900" height="520" aria-label="Drawing canvas"></canvas></div></div>`;
+    const field = gameSection.querySelector(".drawing-field"); const canvas = field.querySelector("canvas"); const ctx = canvas.getContext("2d");
+    function point(event) { const box = canvas.getBoundingClientRect(); return { x: (event.clientX - box.left) * canvas.width / box.width, y: (event.clientY - box.top) * canvas.height / box.height }; }
+    canvas.addEventListener("pointerdown", (event) => { const p = point(event); drawing = true; canvas.setPointerCapture(event.pointerId); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener("pointermove", (event) => { if (!drawing) return; const p = point(event); ctx.strokeStyle = color; ctx.lineWidth = 10; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineTo(p.x, p.y); ctx.stroke(); });
+    canvas.addEventListener("pointerup", () => { drawing = false; }); canvas.addEventListener("pointercancel", () => { drawing = false; });
+    field.querySelectorAll(".drawing-colors button").forEach((button) => button.addEventListener("click", () => { color = button.dataset.color; field.querySelectorAll(".drawing-colors button").forEach((item) => item.setAttribute("aria-pressed", String(item === button))); }));
+    field.querySelector(".clear-drawing").addEventListener("click", () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+    field.querySelector(".save-drawing").addEventListener("click", () => { const link = document.createElement("a"); link.download = `drift-drawing-${Date.now()}.png`; link.href = canvas.toDataURL("image/png"); link.click(); });
+  }
+
+  function renderBubbles(round = 0) {
+    const bubbles = Array.from({ length: 18 }, (_, index) => ({ id: index, left: 5 + ((index * 37 + round * 13) % 88), top: 6 + ((index * 29 + round * 17) % 78), size: 42 + ((index * 11 + round * 7) % 48) }));
+    gameShell().outerHTML = `<div class="game-shell bubble-game"><div class="game-top"><span>Pop each bubble at your own pace</span><strong class="bubble-score">0 of 18</strong></div><div class="bubble-field">${bubbles.map((bubble) => `<button type="button" data-bubble="${bubble.id}" aria-label="Pop calming bubble" style="left:${bubble.left}%;top:${bubble.top}%;width:${bubble.size}px;height:${bubble.size}px"></button>`).join("")}</div></div>`;
+    const field = gameSection.querySelector(".bubble-field"); const score = gameSection.querySelector(".bubble-score"); let popped = 0;
+    field.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => { button.remove(); popped += 1; score.textContent = `${popped} of 18`; if (popped === 18) { field.insertAdjacentHTML("beforeend", '<div class="bubble-complete"><strong>The space is clear</strong><span>Notice the quiet for one breath.</span><button type="button">New bubbles</button></div>'); field.querySelector(".bubble-complete button").addEventListener("click", () => renderBubbles(round + 1)); } }));
+  }
+
   function renderBreathing() {
     const phases = [
       { key: "inhale", label: "Breathe in", duration: 4 },
@@ -347,13 +399,13 @@
     gameCopy.textContent = game.copy;
     currentGameId = game.id;
     if (game.id === "calm-chess") renderCalmChess();
-    else if (game.id === "calm-focus" || game.id === "moderate-focus") renderFocus();
-    else if (game.id === "calm-memory" || game.id === "balanced-memory") renderMemory();
+    else if (game.id === "calm-word") renderWordSearch();
+    else if (game.id === "calm-memory") renderMemory();
     else if (game.id === "balanced-jigsaw") renderJigsaw3D();
-    else if (game.id === "balanced-swap" || game.id === "moderate-puzzle") renderPuzzle();
-    else if (game.id === "moderate-hidden") renderFind();
+    else if (game.id === "balanced-shapes") renderShapeMatch();
+    else if (game.id === "balanced-draw") renderDrawing();
     else if (game.id === "high-breathe") renderBreathing();
-    else if (game.id === "high-echo") renderRhythm();
+    else if (game.id === "high-bubbles") renderBubbles();
     else renderCustomSongRhythm();
   }
 
@@ -426,7 +478,7 @@
     const info = stressInfo(stress);
     const gain = new Tone.Gain(0.16).toDestination();
     const reverb = new Tone.Reverb({ decay: info.key === "high" ? 8 : 4, wet: 0.7 }).connect(gain);
-    const middleStress = info.key === "balanced" || info.key === "moderate";
+    const middleStress = info.key === "balanced";
     const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: info.key === "low" ? "triangle" : "sine" }, envelope: { attack: info.key === "low" ? 0.8 : middleStress ? 2.2 : 3.8, release: info.key === "high" ? 7 : 4 } }).connect(reverb);
     const notes = info.key === "low" ? ["C4", "E4", "G4", "C5", "G4", "E4"] : middleStress ? ["A3", "C4", "E4", "G4", "E4", "C4"] : ["F3", "C4", "A3", "G3"];
     let step = 0;

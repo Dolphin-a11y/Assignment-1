@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type CheckIn = { id: number; level: number; label: string; time: string };
-type StressKey = "low" | "balanced" | "moderate" | "high";
+type StressKey = "low" | "balanced" | "high";
 type GameOption = { id: string; title: string; description: string };
 
 type AudioNodeLike = { connect: (destination: unknown) => AudioNodeLike; dispose: () => void };
@@ -44,32 +44,26 @@ const videos = [
 ];
 
 function stressInfo(level: number): { key: StressKey; label: string; note: string; color: string } {
-  if (level <= 2) return { key: "low", label: "Calm & steady", note: "Enjoy a thoughtful game at an unhurried pace.", color: "#2f5141" };
-  if (level <= 5) return { key: "balanced", label: "Balanced & open", note: "A tactile challenge can keep your mind gently engaged.", color: "#4f8069" };
-  if (level <= 7) return { key: "moderate", label: "A little stretched", note: "Let’s gently redirect your attention.", color: "#b86b37" };
+  if (level <= 3) return { key: "low", label: "Calm & steady", note: "Enjoy a thoughtful game at an unhurried pace.", color: "#2f5141" };
+  if (level <= 7) return { key: "balanced", label: "Balanced & open", note: "A tactile challenge can keep your mind gently engaged.", color: "#4f8069" };
   return { key: "high", label: "Feeling overloaded", note: "No rush. Follow a simple rhythm or calming pattern.", color: "#6a5d9d" };
 }
 
 const gameCatalog: Record<StressKey, GameOption[]> = {
   low: [
     { id: "calm-chess", title: "Calm 3D Chess", description: "Play with the gentle AI or invite a friend into a quiet chess room." },
-    { id: "calm-focus", title: "Drifting Focus", description: "Follow a softly moving orb for a short, playful attention break." },
+    { id: "calm-word", title: "Quiet Word Search", description: "Find a peaceful word hidden among the letters." },
     { id: "calm-memory", title: "Garden Memory", description: "Match peaceful symbols and let your attention settle naturally." },
   ],
   balanced: [
     { id: "balanced-jigsaw", title: "Your 3D Jigsaw", description: "Build a tactile puzzle from a Drift scene or an image of your own." },
-    { id: "balanced-swap", title: "Picture Pieces", description: "Swap image tiles until the calming scene becomes whole again." },
-    { id: "balanced-memory", title: "Gentle Pairs", description: "Turn over cards and find the matching nature pairs." },
-  ],
-  moderate: [
-    { id: "moderate-hidden", title: "Hidden Object Room", description: "Search a detailed 3D room for one small object at a time." },
-    { id: "moderate-focus", title: "Focus Sprint", description: "Channel busy thoughts into a simple twenty-second challenge." },
-    { id: "moderate-puzzle", title: "Quick Picture Puzzle", description: "Redirect your attention by rebuilding a small scenic puzzle." },
+    { id: "balanced-shapes", title: "Match the Shape", description: "Choose the shape that matches the gentle target." },
+    { id: "balanced-draw", title: "Calm Drawing", description: "Draw freely, choose colours, and save your picture to your device." },
   ],
   high: [
     { id: "high-song", title: "Your Song Rhythm", description: "Upload a favourite song and follow its rhythm using your keyboard." },
     { id: "high-breathe", title: "Guided Breathing", description: "Follow a slow inhale, gentle hold, and longer exhale." },
-    { id: "high-echo", title: "Gentle Rhythm Echo", description: "Listen to a soft musical pattern and repeat it one beat at a time." },
+    { id: "high-bubbles", title: "Calming Bubbles", description: "Pop slow-floating bubbles and watch the space gently clear." },
   ],
 };
 
@@ -384,15 +378,89 @@ function MemoryMatchGame() {
   );
 }
 
+function WordSearchGame() {
+  const words = ["CALM", "PAUSE", "SMILE", "QUIET", "BREATHE"];
+  const [round, setRound] = useState(0);
+  const [chosen, setChosen] = useState<number[]>([]);
+  const word = words[round % words.length];
+  const row = (round * 3 + 1) % 7;
+  const vertical = round % 2 === 1;
+  const cells = useMemo(() => {
+    const alphabet = "NATURESOFTLIGHTPEACEBLOOMRESTWAVESKY";
+    const letters = Array.from({ length: 49 }, (_, index) => alphabet[(index * 7 + round * 5) % alphabet.length]);
+    word.split("").forEach((letter, index) => { letters[vertical ? index * 7 + row : row * 7 + index] = letter; });
+    return letters;
+  }, [round, word, row, vertical]);
+  const targetIndexes = word.split("").map((_, index) => vertical ? index * 7 + row : row * 7 + index);
+  const found = chosen.length === targetIndexes.length && chosen.every((cell, index) => cell === targetIndexes[index]);
+
+  function choose(index: number) {
+    if (found) return;
+    const next = chosen.length && index !== chosen[chosen.length - 1] + (vertical ? 7 : 1) ? [index] : [...chosen, index];
+    setChosen(next.slice(-word.length));
+  }
+
+  return (
+    <div className="game-shell word-game">
+      <div className="game-top"><span>Find the word <b>{word}</b></span><strong>Round {round + 1}</strong></div>
+      <div className="word-field"><div className="word-grid">{cells.map((letter, index) => <button type="button" key={index} onClick={() => choose(index)} className={chosen.includes(index) ? "chosen" : ""} aria-label={`Letter ${letter}, row ${Math.floor(index / 7) + 1}, column ${(index % 7) + 1}`}>{letter}</button>)}</div>{found && <div className="word-found"><strong>You found {word}</strong><span>Let that small success settle.</span><button onClick={() => { setRound((value) => value + 1); setChosen([]); }}>New word</button></div>}</div>
+    </div>
+  );
+}
+
+function ShapeMatchGame() {
+  const shapes = ["●", "▲", "■", "◆", "★"];
+  const [round, setRound] = useState(0);
+  const [message, setMessage] = useState("Choose the matching shape");
+  const target = shapes[round % shapes.length];
+  const choices = [...shapes.slice(round % shapes.length), ...shapes.slice(0, round % shapes.length)];
+
+  function choose(shape: string) {
+    if (shape === target) { setMessage("Perfect match!"); window.setTimeout(() => { setRound((value) => value + 1); setMessage("Choose the matching shape"); }, 650); }
+    else setMessage("Try another shape");
+  }
+
+  return <div className="game-shell shape-game"><div className="game-top"><span>Match shape, not colour</span><strong>Round {round + 1}</strong></div><div className="shape-field"><div className="shape-target" aria-label={`Target shape ${target}`}>{target}</div><strong aria-live="polite">{message}</strong><div className="shape-choices">{choices.map((shape, index) => <button type="button" key={shape} className={`shape-${index}`} onClick={() => choose(shape)} aria-label={`Choose shape ${shape}`}>{shape}</button>)}</div></div></div>;
+}
+
+function DrawingGame() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const drawing = useRef(false);
+  const [color, setColor] = useState("#4f8069");
+  const colors = ["#4f8069", "#6a5d9d", "#d17a4a", "#397b99", "#d4a552", "#293a35"];
+
+  function point(event: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = canvasRef.current!; const box = canvas.getBoundingClientRect();
+    return { x: (event.clientX - box.left) * canvas.width / box.width, y: (event.clientY - box.top) * canvas.height / box.height };
+  }
+  function start(event: React.PointerEvent<HTMLCanvasElement>) { const canvas = canvasRef.current!; const ctx = canvas.getContext("2d")!; const p = point(event); drawing.current = true; canvas.setPointerCapture(event.pointerId); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+  function move(event: React.PointerEvent<HTMLCanvasElement>) { if (!drawing.current) return; const canvas = canvasRef.current!; const ctx = canvas.getContext("2d")!; const p = point(event); ctx.strokeStyle = color; ctx.lineWidth = 10; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineTo(p.x, p.y); ctx.stroke(); }
+  function stop() { drawing.current = false; }
+  function clear() { const canvas = canvasRef.current!; canvas.getContext("2d")!.clearRect(0, 0, canvas.width, canvas.height); }
+  function save() { const link = document.createElement("a"); link.download = `drift-drawing-${Date.now()}.png`; link.href = canvasRef.current!.toDataURL("image/png"); link.click(); }
+
+  return <div className="game-shell drawing-game"><div className="game-top"><span>Draw anything that feels calming</span><strong>Your private canvas</strong></div><div className="drawing-field"><div className="drawing-toolbar"><div className="drawing-colors" aria-label="Drawing colours">{colors.map((item) => <button type="button" key={item} aria-label={`Use colour ${item}`} aria-pressed={color === item} onClick={() => setColor(item)} style={{ background: item }} />)}</div><div><button type="button" onClick={clear}>Clear</button><button type="button" className="save-drawing" onClick={save}>Save drawing</button></div></div><canvas ref={canvasRef} width="900" height="520" onPointerDown={start} onPointerMove={move} onPointerUp={stop} onPointerCancel={stop} aria-label="Drawing canvas" /></div></div>;
+}
+
+function CalmingBubblesGame() {
+  const makeBubbles = (round: number) => Array.from({ length: 18 }, (_, index) => ({ id: index, left: 5 + ((index * 37 + round * 13) % 88), top: 6 + ((index * 29 + round * 17) % 78), size: 42 + ((index * 11 + round * 7) % 48) }));
+  const [round, setRound] = useState(0);
+  const [bubbles, setBubbles] = useState(() => makeBubbles(0));
+  const popped = 18 - bubbles.length;
+  function pop(id: number) { setBubbles((items) => items.filter((bubble) => bubble.id !== id)); }
+  function newBubbles() { const next = round + 1; setRound(next); setBubbles(makeBubbles(next)); }
+  return <div className="game-shell bubble-game"><div className="game-top"><span>Pop each bubble at your own pace</span><strong>{popped} of 18</strong></div><div className="bubble-field">{bubbles.map((bubble) => <button type="button" key={bubble.id} aria-label="Pop calming bubble" onClick={() => pop(bubble.id)} style={{ left: `${bubble.left}%`, top: `${bubble.top}%`, width: bubble.size, height: bubble.size }} />)}{!bubbles.length && <div className="bubble-complete"><strong>The space is clear</strong><span>Notice the quiet for one breath.</span><button onClick={newBubbles}>New bubbles</button></div>}</div></div>;
+}
+
 function GeneratedGame({ id }: { id: string }) {
   if (id === "calm-chess") return <CalmChessGame />;
-  if (id === "calm-focus" || id === "moderate-focus") return <FocusGame />;
-  if (id === "calm-memory" || id === "balanced-memory") return <MemoryMatchGame />;
+  if (id === "calm-word") return <WordSearchGame />;
+  if (id === "calm-memory") return <MemoryMatchGame />;
   if (id === "balanced-jigsaw") return <Jigsaw3DGame />;
-  if (id === "balanced-swap" || id === "moderate-puzzle") return <PuzzleGame />;
-  if (id === "moderate-hidden") return <FindGame />;
+  if (id === "balanced-shapes") return <ShapeMatchGame />;
+  if (id === "balanced-draw") return <DrawingGame />;
   if (id === "high-breathe") return <BreathingGame />;
-  if (id === "high-echo") return <RhythmGame />;
+  if (id === "high-bubbles") return <CalmingBubblesGame />;
   return <CustomSongRhythmGame />;
 }
 
@@ -430,7 +498,7 @@ export default function Home() {
       soundRef.current?.dispose();
       const gain = new Tone.Gain(0.16).toDestination();
       const reverb = new Tone.Reverb({ decay: info.key === "high" ? 8 : 4, wet: 0.7 }).connect(gain);
-      const middleStress = info.key === "balanced" || info.key === "moderate";
+      const middleStress = info.key === "balanced";
       const synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: info.key === "low" ? "triangle" : "sine" }, envelope: { attack: info.key === "low" ? 0.8 : middleStress ? 2.2 : 3.8, release: info.key === "high" ? 7 : 4 } }).connect(reverb);
       const notes = info.key === "low" ? ["C4", "E4", "G4", "C5", "G4", "E4"] : middleStress ? ["A3", "C4", "E4", "G4", "E4", "C4"] : ["F3", "C4", "A3", "G3"];
       let step = 0;
@@ -474,7 +542,7 @@ export default function Home() {
         <p>No judgement. Slide to where you are and we’ll shape a small moment of relief around you.</p>
         <div className="checkin-card">
           <div className="status-row"><div><span className="status-dot" /><strong>{info.label}</strong><small>{info.note}</small></div><div className="level"><strong>{stress}</strong><span>/ 10</span></div></div>
-          <div className="slider-wrap"><input aria-label="Current stress level" type="range" min="1" max="10" value={stress} onChange={(e) => setStress(Number(e.target.value))} style={{ "--progress": `${(stress - 1) / 9 * 100}%` } as React.CSSProperties} /><div className="slider-labels"><span>Calm</span><span>Balanced</span><span>Moderate</span><span>Overwhelmed</span></div></div>
+          <div className="slider-wrap"><input aria-label="Current stress level" type="range" min="1" max="10" value={stress} onChange={(e) => setStress(Number(e.target.value))} style={{ "--progress": `${(stress - 1) / 9 * 100}%` } as React.CSSProperties} /><div className="slider-labels"><span>Calm</span><span>Balanced</span><span>Overwhelmed</span></div></div>
           <button className="primary" onClick={saveCheckIn}>{saved ? "Check-in saved ✓" : "Save today’s check-in"}</button>
         </div>
       </section>
