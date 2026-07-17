@@ -9,6 +9,10 @@ const game = document.querySelector("#game");
 const boardElement = document.querySelector("#chess-board");
 const notice = document.querySelector("#notice");
 const feedback = document.querySelector("#feedback");
+const textureSlider = document.querySelector("#board-texture");
+const textureName = document.querySelector("#texture-name");
+const boardWrap = document.querySelector(".board-wrap");
+const textureOptions = ["Classic wood", "Deep walnut", "Calm marble", "Ocean glass"];
 
 let mode = "";
 let code = "";
@@ -24,6 +28,16 @@ let isHost = false;
 let movePending = false;
 let cameraTurn = 0;
 let lastAnimatedMove = "";
+
+function setBoardTexture(value, announce = false) {
+  const textureIndex = Math.max(0, Math.min(textureOptions.length - 1, Number(value) || 0));
+  boardWrap.dataset.texture = String(textureIndex);
+  textureSlider.value = String(textureIndex);
+  textureName.value = textureOptions[textureIndex];
+  textureName.textContent = textureOptions[textureIndex];
+  localStorage.setItem("drift-chess-texture", String(textureIndex));
+  if (announce) showNotice(`${textureOptions[textureIndex]} board selected.`);
+}
 
 function showNotice(message) {
   notice.textContent = message;
@@ -308,6 +322,9 @@ document.querySelector("#reset-game").addEventListener("click", () => {
 document.querySelector("#rotate-left").addEventListener("click", () => rotateCamera(-1));
 document.querySelector("#rotate-right").addEventListener("click", () => rotateCamera(1));
 document.querySelector("#reset-view").addEventListener("click", () => { cameraTurn = 0; updateCamera(); });
+textureSlider.addEventListener("input", (event) => setBoardTexture(event.target.value));
+textureSlider.addEventListener("change", (event) => setBoardTexture(event.target.value, true));
+setBoardTexture(localStorage.getItem("drift-chess-texture") || 0);
 document.addEventListener("keydown", (event) => {
   if (game.hidden || event.target.matches("input, button")) return;
   if (event.key === "ArrowLeft") rotateCamera(-1);

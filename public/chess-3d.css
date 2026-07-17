@@ -41,6 +41,58 @@
   letter-spacing: .04em;
 }
 
+.texture-control {
+  width: min(620px, 92%);
+  margin: 0 auto 14px;
+  padding: 12px 16px 10px;
+  border: 1px solid #73513938;
+  border-radius: 18px;
+  background: #fffaf2d9;
+  box-shadow: 0 8px 24px #3f291b16;
+}
+
+.texture-copy,
+.texture-stops {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.texture-copy label {
+  color: #4b3324;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.texture-copy output {
+  color: #765239;
+  font: 600 13px Georgia, serif;
+}
+
+#board-texture {
+  width: 100%;
+  height: 24px;
+  margin: 5px 0 0;
+  accent-color: #765239;
+  cursor: ew-resize;
+}
+
+.texture-stops {
+  color: #78695e;
+  font-size: 8px;
+  letter-spacing: .04em;
+}
+
+.texture-control p {
+  margin: 5px 0 0;
+  color: #78695e;
+  text-align: center;
+  font-size: 9px;
+}
+
 .table-scene {
   position: relative;
   width: min(760px, 100%);
@@ -59,6 +111,7 @@
   isolation: isolate;
   transform-style: preserve-3d;
   pointer-events: auto;
+  transition: background .45s ease, box-shadow .45s ease;
 }
 
 .table-scene::before {
@@ -103,7 +156,7 @@
   transform: rotateZ(var(--board-turn)) skewX(-3deg) scaleY(var(--board-depth-scale));
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
-  transition: transform .55s cubic-bezier(.2,.8,.2,1);
+  transition: transform .55s cubic-bezier(.2,.8,.2,1), border-color .45s ease, background .45s ease, box-shadow .45s ease;
   pointer-events: auto;
 }
 
@@ -123,7 +176,25 @@
   transform-style: preserve-3d;
   border-radius: 0;
   pointer-events: auto;
+  transition: background .45s ease, box-shadow .2s ease;
 }
+
+.board-wrap[data-texture="1"] .table-scene {
+  background: radial-gradient(ellipse at 50% 35%, #9d6845 0 8%, transparent 42%), repeating-linear-gradient(88deg, #372016 0 4px, #593420 4px 58px, #29160f 60px 64px), #402319;
+}
+.board-wrap[data-texture="1"] .table-scene .board { border-color:#382116; background:#23140e; box-shadow:0 5px 0 #2b180f,0 12px 0 #170c08,0 22px 30px #09040399,inset 0 0 0 3px #9b6846,inset 0 0 18px #090403; }
+.board-wrap[data-texture="1"] .table-scene .square.light { background:linear-gradient(135deg,#d7b68c,#a97954),repeating-linear-gradient(88deg,#fff2 0 1px,transparent 1px 8px); }
+.board-wrap[data-texture="1"] .table-scene .square.dark { background:linear-gradient(135deg,#68412c,#352219),repeating-linear-gradient(88deg,#fff1 0 1px,transparent 1px 8px); }
+
+.board-wrap[data-texture="2"] .table-scene { background:radial-gradient(circle at 25% 18%,#ffffffaa 0 2px,transparent 3px),radial-gradient(circle at 75% 70%,#ffffff70 0 1px,transparent 2px),linear-gradient(135deg,#d6d9d8,#8f9897); background-size:31px 31px,23px 23px,auto; box-shadow:inset 0 0 90px #26302f55,0 24px 55px #33211733; }
+.board-wrap[data-texture="2"] .table-scene .board { border-color:#596362; background:#313938; box-shadow:0 5px 0 #4d5756,0 12px 0 #293130,0 22px 30px #10181788,inset 0 0 0 3px #d8dddd,inset 0 0 18px #151c1b; }
+.board-wrap[data-texture="2"] .table-scene .square.light { background:linear-gradient(145deg,#f3f1eb,#cfd4d1 54%,#e8e5df); }
+.board-wrap[data-texture="2"] .table-scene .square.dark { background:linear-gradient(145deg,#7b8987,#465452 54%,#667371); }
+
+.board-wrap[data-texture="3"] .table-scene { background:radial-gradient(ellipse at 50% 32%,#9ee7e1aa 0 7%,transparent 43%),repeating-radial-gradient(ellipse at 50% 105%,#d9ffff22 0 3px,transparent 4px 28px),linear-gradient(145deg,#1d6d78,#0b354b); box-shadow:inset 0 0 90px #061c35aa,0 24px 55px #142b453d; }
+.board-wrap[data-texture="3"] .table-scene .board { border-color:#174b5c; background:#092f43; box-shadow:0 5px 0 #123e50,0 12px 0 #082433,0 22px 30px #03131d99,inset 0 0 0 3px #83d4d0,inset 0 0 18px #041822; }
+.board-wrap[data-texture="3"] .table-scene .square.light { background:linear-gradient(145deg,#d8f3ed,#9bd4cd); }
+.board-wrap[data-texture="3"] .table-scene .square.dark { background:linear-gradient(145deg,#26788a,#12465f); }
 
 .table-scene .square.light {
   background:

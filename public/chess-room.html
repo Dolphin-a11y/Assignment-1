@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="./chess-room.css?v=1">
   <link rel="stylesheet" href="./chess-pieces.css?v=1">
   <link rel="stylesheet" href="./chess-modes.css?v=1">
-  <link rel="stylesheet" href="./chess-3d.css?v=5">
+  <link rel="stylesheet" href="./chess-3d.css?v=6">
 </head>
 <body>
   <main class="chess-app">
@@ -47,6 +47,15 @@
           <button class="view-reset" id="reset-view" type="button">Front view</button>
           <button id="rotate-right" type="button" aria-label="Rotate board right">↷</button>
         </div>
+        <div class="texture-control">
+          <div class="texture-copy">
+            <label for="board-texture">Board texture</label>
+            <output id="texture-name" for="board-texture">Classic wood</output>
+          </div>
+          <input id="board-texture" type="range" min="0" max="3" step="1" value="0" aria-describedby="texture-hint">
+          <div class="texture-stops" aria-hidden="true"><span>Wood</span><span>Walnut</span><span>Marble</span><span>Ocean</span></div>
+          <p id="texture-hint">Slide to change the tabletop and board finish.</p>
+        </div>
         <div class="table-scene">
           <div class="board" id="chess-board" aria-label="Interactive 3D chess board"></div>
         </div>
@@ -58,6 +67,6 @@
     <div class="notice" id="notice" role="alert" hidden></div>
     <footer><span>Two players · synchronized room · touch or click to move</span><a href="https://github.com/niklasf/python-chess" target="_blank" rel="noreferrer">Rules behavior referenced from python-chess documentation</a></footer>
   </main>
-  <script type="module" src="./chess-room.js?v=12"></script>
+  <script type="module" src="./chess-room.js?v=13"></script>
 </body>
 </html>
